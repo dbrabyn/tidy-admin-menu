@@ -3,7 +3,7 @@
  * Plugin Name: Tidy Admin Menu
  * Plugin URI: https://github.com/dbrabyn/tidy-admin-menu
  * Description: Declutter your WordPress dashboard by sorting and hiding admin menu items with a simple Show All toggle.
- * Version: 1.0.3
+ * Version: 1.0.4
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * Author: David Brabyn
@@ -19,7 +19,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'TIDY_ADMIN_MENU_VERSION', '1.0.3' );
+define( 'TIDY_ADMIN_MENU_VERSION', '1.0.4' );
 define( 'TIDY_ADMIN_MENU_FILE', __FILE__ );
 define( 'TIDY_ADMIN_MENU_PATH', plugin_dir_path( __FILE__ ) );
 define( 'TIDY_ADMIN_MENU_URL', plugin_dir_url( __FILE__ ) );
@@ -30,7 +30,7 @@ require_once TIDY_ADMIN_MENU_PATH . 'plugin-update-checker/plugin-update-checker
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
 $tidy_admin_menu_update_checker = PucFactory::buildUpdateChecker(
-	'https://github.com/developerdavid/tidy-admin-menu/',
+	'https://github.com/dbrabyn/tidy-admin-menu/',
 	__FILE__,
 	'tidy-admin-menu'
 );
@@ -113,3 +113,56 @@ function tidy_admin_menu_plugin_links( $links ) {
 	return $links;
 }
 add_filter( 'plugin_action_links_' . TIDY_ADMIN_MENU_BASENAME, 'tidy_admin_menu_plugin_links' );
+
+/**
+ * Display admin notice if conflicting plugins are active.
+ *
+ * @since 1.0.4
+ */
+function tidy_admin_menu_conflict_notice() {
+	// Only show to users who can manage plugins.
+	if ( ! current_user_can( 'activate_plugins' ) ) {
+		return;
+	}
+
+	// List of known conflicting plugins: path => name.
+	$conflicts = array(
+		'wp-clean-admin-menu/wp-clean-admin-menu.php'  => 'WP Clean Admin Menu',
+		'admin-menu-editor/menu-editor.php'            => 'Admin Menu Editor',
+		'admin-menu-editor-pro/menu-editor.php'        => 'Admin Menu Editor Pro',
+		'adminimize/adminimize.php'                    => 'Adminimize',
+		'adminify/adminify.php'                        => 'WP Adminify',
+		'jejedev-dashboard/jejedev-dashboard.php'         => 'Jejedev Dashboard',
+		'jejedev-dashboard/jejedev-admin.php'          => 'Jejedev Dashboard',
+		'white-label-cms/white-label-cms.php'          => 'White Label CMS',
+	);
+
+	$active_conflicts = array();
+
+	foreach ( $conflicts as $plugin_path => $plugin_name ) {
+		if ( is_plugin_active( $plugin_path ) ) {
+			$active_conflicts[] = $plugin_name;
+		}
+	}
+
+	if ( empty( $active_conflicts ) ) {
+		return;
+	}
+
+	$plugin_list = implode( ', ', $active_conflicts );
+	?>
+	<div class="notice notice-warning is-dismissible">
+		<p>
+			<strong><?php esc_html_e( 'Tidy Admin Menu:', 'tidy-admin-menu' ); ?></strong>
+			<?php
+			printf(
+				/* translators: %s: list of conflicting plugin names */
+				esc_html__( 'The following plugin(s) may conflict with admin menu ordering: %s. Consider deactivating them for best results.', 'tidy-admin-menu' ),
+				'<strong>' . esc_html( $plugin_list ) . '</strong>'
+			);
+			?>
+		</p>
+	</div>
+	<?php
+}
+add_action( 'admin_notices', 'tidy_admin_menu_conflict_notice' );

@@ -85,6 +85,11 @@
 		bindEvents: function() {
 			var self = this;
 
+			// Reset button.
+			$( '#tidy-reset-menu' ).on( 'click', function() {
+				self.resetMenu();
+			} );
+
 			// Visibility toggle.
 			$( document ).on( 'change', '.tidy-visibility-toggle', function() {
 				var $item = $( this ).closest( '.tidy-menu-item' );
@@ -495,6 +500,37 @@
 			};
 
 			reader.readAsText( file );
+		},
+
+		/**
+		 * Reset menu to default.
+		 */
+		resetMenu: function() {
+			if ( ! confirm( tidyAdminMenu.strings.confirmReset ) ) {
+				return;
+			}
+
+			var postData = {
+				action: 'tidy_reset_menu',
+				nonce: tidyAdminMenu.nonce
+			};
+
+			// Include role if in role mode.
+			if ( this.applyTo === 'role' && this.activeRole ) {
+				postData.role = this.activeRole;
+			}
+
+			$.post( tidyAdminMenu.ajaxUrl, postData )
+			.done( function( response ) {
+				if ( response.success ) {
+					window.location.reload();
+				} else {
+					alert( tidyAdminMenu.strings.resetError );
+				}
+			} )
+			.fail( function() {
+				alert( tidyAdminMenu.strings.resetError );
+			} );
 		},
 
 		/**

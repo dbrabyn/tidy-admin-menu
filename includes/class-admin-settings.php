@@ -117,12 +117,15 @@ class Admin_Settings {
 				'activeRole'    => $active_role,
 				'standardRoles' => $standard_roles,
 				'strings'       => array(
-					'unsaved'      => __( 'Unsaved changes', 'tidy-admin-menu' ),
-					'saving'       => __( 'Saving...', 'tidy-admin-menu' ),
-					'saved'        => __( 'Saved', 'tidy-admin-menu' ),
-					'error'        => __( 'Error saving. Please try again.', 'tidy-admin-menu' ),
-					'separator'    => __( 'Separator', 'tidy-admin-menu' ),
-					'noFileChosen' => __( 'No file chosen', 'tidy-admin-menu' ),
+					'unsaved'       => __( 'Unsaved changes', 'tidy-admin-menu' ),
+					'saving'        => __( 'Saving...', 'tidy-admin-menu' ),
+					'saved'         => __( 'Saved', 'tidy-admin-menu' ),
+					'error'         => __( 'Error saving. Please try again.', 'tidy-admin-menu' ),
+					'separator'     => __( 'Separator', 'tidy-admin-menu' ),
+					'noFileChosen'  => __( 'No file chosen', 'tidy-admin-menu' ),
+					'confirmReset'  => __( 'Are you sure you want to reset the menu to default? This will restore the original WordPress menu order and show all hidden items.', 'tidy-admin-menu' ),
+					'resetSuccess'  => __( 'Menu reset to default.', 'tidy-admin-menu' ),
+					'resetError'    => __( 'Error resetting menu. Please try again.', 'tidy-admin-menu' ),
 				),
 			)
 		);
@@ -374,6 +377,15 @@ class Admin_Settings {
 							<?php esc_html_e( 'Save Settings', 'tidy-admin-menu' ); ?>
 						</button>
 						<span id="tidy-save-status" class="tidy-save-status" aria-live="polite"></span>
+					</div>
+
+					<hr>
+
+					<div class="tidy-reset-section">
+						<button type="button" id="tidy-reset-menu" class="button button-link-delete">
+							<?php esc_html_e( 'Reset to Default', 'tidy-admin-menu' ); ?>
+						</button>
+						<p class="description"><?php esc_html_e( 'Restore the original WordPress menu order and show all hidden items.', 'tidy-admin-menu' ); ?></p>
 					</div>
 
 				</div>
