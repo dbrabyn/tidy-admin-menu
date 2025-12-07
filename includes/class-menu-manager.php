@@ -35,8 +35,8 @@ class Menu_Manager {
 	 * Constructor.
 	 */
 	public function __construct() {
-		// Enable custom menu order.
-		add_filter( 'custom_menu_order', '__return_true' );
+		// Enable custom menu order only if user has configured one.
+		add_filter( 'custom_menu_order', array( $this, 'should_use_custom_order' ) );
 
 		// Apply custom menu order.
 		add_filter( 'menu_order', array( $this, 'apply_menu_order' ), 999 );
@@ -58,6 +58,18 @@ class Menu_Manager {
 
 		// Add separator styles.
 		add_action( 'admin_head', array( $this, 'separator_styles' ) );
+	}
+
+	/**
+	 * Check if custom menu order should be used.
+	 *
+	 * Only returns true if the user has actually configured a menu order.
+	 *
+	 * @return bool Whether to use custom menu order.
+	 */
+	public function should_use_custom_order() {
+		$order = $this->get_menu_order();
+		return ! empty( $order );
 	}
 
 	/**
