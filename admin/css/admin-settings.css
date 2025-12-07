@@ -1,0 +1,464 @@
+/**
+ * Tidy Admin Menu - Settings Page Styles
+ *
+ * @package Tidy_Admin_Menu
+ * @since 1.0.0
+ */
+
+/* Container layout */
+.tidy-admin-menu-wrap {
+	max-width: 1200px;
+}
+
+.tidy-admin-menu-container {
+	display: flex;
+	gap: 30px;
+	margin-top: 20px;
+}
+
+.tidy-menu-list-wrapper {
+	flex: 1;
+	max-width: 600px;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	padding: 20px;
+}
+
+.tidy-settings-panel {
+	width: 280px;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	padding: 20px;
+	align-self: flex-start;
+}
+
+/* Role tabs */
+.tidy-role-tabs-wrapper {
+	margin-bottom: 15px;
+}
+
+.tidy-role-tabs-wrapper.tidy-tabs-hidden {
+	display: none;
+}
+
+.tidy-role-tabs.nav-tab-wrapper {
+	border-bottom: 1px solid #c3c4c7;
+	margin: 0;
+	padding-top: 0;
+}
+
+.tidy-role-tabs .nav-tab {
+	margin-left: 0;
+	margin-right: 4px;
+	border-radius: 4px 4px 0 0;
+	background: #f0f0f1;
+	border-color: #c3c4c7;
+	color: #50575e;
+}
+
+.tidy-role-tabs .nav-tab:hover {
+	background: #fff;
+	color: #1d2327;
+}
+
+.tidy-role-tabs .nav-tab-active,
+.tidy-role-tabs .nav-tab-active:hover,
+.tidy-role-tabs .nav-tab-active:focus {
+	background: #fff;
+	border-bottom-color: #fff;
+	color: #1d2327;
+}
+
+.tidy-role-tabs .nav-tab-disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	background: #f0f0f1;
+	color: #787c82;
+}
+
+.tidy-role-tabs .nav-tab-disabled:hover {
+	background: #f0f0f1;
+	color: #787c82;
+}
+
+/* Toolbar */
+.tidy-toolbar {
+	display: flex;
+	justify-content: space-between;
+	gap: 10px;
+	margin-bottom: 15px;
+	padding-bottom: 15px;
+	border-bottom: 1px solid #dcdcde;
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.tidy-toolbar .button {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.tidy-toolbar .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+	line-height: 1;
+}
+
+.tidy-show-all-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	cursor: pointer;
+	padding: 4px 8px;
+}
+
+.tidy-show-all-label input[type="checkbox"] {
+	margin: 0;
+}
+
+.tidy-save-status {
+	font-style: italic;
+	color: #50575e;
+}
+
+.tidy-save-status.saving {
+	color: #2271b1;
+}
+
+.tidy-save-status.saved {
+	color: #00a32a;
+}
+
+.tidy-save-status.error {
+	color: #d63638;
+}
+
+.tidy-save-status.unsaved {
+	color: #dba617;
+}
+
+/* Menu list */
+.tidy-menu-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.tidy-menu-item {
+	display: flex;
+	align-items: center;
+	padding: 6px 12px;
+	margin: 0;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	margin-bottom: 2px;
+	cursor: grab;
+	transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tidy-menu-item:hover {
+	background: #fff;
+	border-color: #c3c4c7;
+}
+
+.tidy-menu-item:focus {
+	outline: 2px solid #2271b1;
+	outline-offset: -2px;
+	background: #fff;
+}
+
+.tidy-menu-item.ui-sortable-helper {
+	cursor: grabbing;
+	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+	background: #fff;
+}
+
+.tidy-menu-item.ui-sortable-placeholder {
+	visibility: visible !important;
+	background: #e5f5fa;
+	border: 2px dashed #2271b1;
+	height: 32px;
+}
+
+/* Hidden items */
+.tidy-menu-item.tidy-is-hidden {
+	opacity: 0.6;
+	background: #fef7f1;
+	border-color: #dba617;
+}
+
+.tidy-menu-item.tidy-is-hidden .tidy-item-title {
+	text-decoration: line-through;
+	color: #787c82;
+}
+
+/* Drag handle */
+.tidy-drag-handle {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	margin-right: 8px;
+	color: #787c82;
+	flex-shrink: 0;
+}
+
+.tidy-drag-handle .dashicons {
+	font-size: 20px;
+	width: 20px;
+	height: 20px;
+}
+
+/* Item content */
+.tidy-item-content {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 1;
+	min-width: 0;
+	cursor: pointer;
+}
+
+.tidy-item-content input[type="checkbox"] {
+	margin: 0;
+	flex-shrink: 0;
+}
+
+.tidy-item-content .dashicons {
+	font-size: 20px;
+	width: 20px;
+	height: 20px;
+	color: #50575e;
+	flex-shrink: 0;
+}
+
+.tidy-menu-icon {
+	width: 20px;
+	height: 20px;
+	flex-shrink: 0;
+}
+
+.tidy-item-title {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Separator items */
+.tidy-separator-item {
+	background: transparent;
+	border: none;
+	padding: 3px 12px;
+}
+
+.tidy-separator-item:hover {
+	background: #f0f0f1;
+	border: none;
+}
+
+.tidy-separator-content {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	width: 100%;
+}
+
+.tidy-separator-line {
+	flex: 1;
+	height: 1px;
+	background: #c3c4c7;
+}
+
+.tidy-separator-label {
+	font-size: 11px;
+	color: #787c82;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.tidy-remove-separator {
+	color: #787c82;
+	padding: 4px;
+	cursor: pointer;
+	border: none;
+	background: none;
+}
+
+.tidy-remove-separator:hover {
+	color: #d63638;
+}
+
+.tidy-remove-separator .dashicons {
+	font-size: 18px;
+	width: 18px;
+	height: 18px;
+	text-decoration: none;
+}
+
+/* Keyboard hint */
+.tidy-keyboard-hint {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 15px;
+	padding-top: 15px;
+	border-top: 1px solid #dcdcde;
+	font-size: 12px;
+	color: #787c82;
+}
+
+.tidy-keyboard-hint .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+}
+
+/* Settings panel */
+.tidy-settings-panel h2 {
+	margin-top: 0;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #dcdcde;
+}
+
+.tidy-save-section {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.tidy-save-section .button {
+	flex-shrink: 0;
+}
+
+.tidy-settings-panel h3 {
+	font-size: 13px;
+	margin: 20px 0 10px;
+}
+
+.tidy-settings-panel fieldset {
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+
+.tidy-settings-panel legend {
+	font-weight: 600;
+	margin-bottom: 10px;
+	padding: 0;
+}
+
+.tidy-settings-panel label {
+	display: block;
+	margin-bottom: 8px;
+	cursor: pointer;
+}
+
+.tidy-settings-panel input[type="radio"] {
+	margin-right: 6px;
+}
+
+.tidy-settings-panel hr {
+	border: none;
+	border-top: 1px solid #dcdcde;
+	margin: 20px 0;
+}
+
+.tidy-import-section {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.tidy-import-file {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.tidy-import-file:focus + .tidy-import-file-label {
+	outline: 2px solid #2271b1;
+	outline-offset: 1px;
+}
+
+.tidy-import-filename {
+	flex: 1;
+	min-width: 0;
+	font-size: 13px;
+	color: #50575e;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.tidy-import-filename.has-file {
+	color: #1d2327;
+}
+
+#tidy-import.tidy-import-hidden {
+	display: none;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+	.tidy-menu-item {
+		transition: none;
+	}
+}
+
+/* Responsive */
+@media screen and (max-width: 782px) {
+	.tidy-admin-menu-container {
+		flex-direction: column;
+	}
+
+	.tidy-menu-list-wrapper,
+	.tidy-settings-panel {
+		width: 100%;
+		max-width: none;
+	}
+
+	.tidy-toolbar {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.tidy-save-section {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.tidy-import-section {
+		flex-direction: column;
+		align-items: stretch;
+	}
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+	.tidy-menu-item {
+		border-width: 2px;
+	}
+
+	.tidy-menu-item:focus {
+		outline-width: 3px;
+	}
+
+	.tidy-separator-line {
+		height: 2px;
+		background: #000;
+	}
+}

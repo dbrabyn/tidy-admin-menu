@@ -1,0 +1,111 @@
+/**
+ * Tidy Admin Menu - Show All Toggle Styles
+ *
+ * Styles for the "Show All" toggle in the admin sidebar
+ * and hidden item visibility.
+ *
+ * @package Tidy_Admin_Menu
+ * @since 1.0.0
+ */
+
+/* Show All toggle wrapper */
+.tidy-show-all-wrapper {
+	position: sticky;
+	bottom: 0;
+	background: #1d2327;
+	border-top: 1px solid #3c434a;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+/* Show All button */
+.tidy-show-all-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	width: 100%;
+	padding: 12px 10px;
+	background: transparent;
+	border: none;
+	color: #a7aaad;
+	font-size: 13px;
+	cursor: pointer;
+	transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.tidy-show-all-btn:hover {
+	background: #2c3338;
+	color: #fff;
+}
+
+.tidy-show-all-btn:focus {
+	outline: 2px solid #2271b1;
+	outline-offset: -2px;
+}
+
+.tidy-show-all-btn .tidy-toggle-icon {
+	font-size: 18px;
+	font-weight: bold;
+	line-height: 1;
+}
+
+/* Active state */
+.tidy-show-all-btn[aria-pressed="true"] {
+	background: #2271b1;
+	color: #fff;
+}
+
+.tidy-show-all-btn[aria-pressed="true"]:hover {
+	background: #135e96;
+}
+
+/* Toggle text - hide on collapsed menu */
+.folded .tidy-toggle-text {
+	display: none;
+}
+
+.folded .tidy-show-all-btn {
+	justify-content: center;
+	padding: 12px 6px;
+}
+
+/* Hidden menu items - default state (hidden) */
+#adminmenu .tidy-hidden-item {
+	display: none;
+}
+
+/* Hidden menu items - visible when Show All is active */
+body.tidy-show-all-active #adminmenu .tidy-hidden-item {
+	display: block;
+	opacity: 0.85;
+}
+
+body.tidy-show-all-active #adminmenu .tidy-hidden-item > a {
+	font-style: italic;
+	border-left: 3px solid #d63638 !important;
+}
+
+/* Hover state for hidden items when visible */
+body.tidy-show-all-active #adminmenu .tidy-hidden-item:hover {
+	opacity: 1;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+	.tidy-show-all-btn {
+		transition: none;
+	}
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+	.tidy-show-all-btn:focus {
+		outline-width: 3px;
+	}
+
+	body.tidy-show-all-active #adminmenu .tidy-hidden-item > a {
+		border-left-width: 4px !important;
+	}
+}
+
