@@ -421,8 +421,10 @@ class Menu_Manager {
 			}
 
 			// Remove notification bubbles (e.g., "Comments 5" -> "Comments").
-			$title = preg_replace( '/ <span.*<\/span>/', '', $title );
+			// Use non-greedy match to avoid consuming text between spans.
+			$title = preg_replace( '/ ?<span[^>]*>.*?<\/span>/s', '', $title );
 			$title = wp_strip_all_tags( $title );
+			$title = trim( $title );
 			$icon  = isset( $item[6] ) ? $item[6] : '';
 			$class = isset( $item[4] ) ? $item[4] : '';
 
