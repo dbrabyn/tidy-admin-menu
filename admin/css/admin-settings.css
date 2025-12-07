@@ -242,6 +242,8 @@
 	width: 20px;
 	height: 20px;
 	flex-shrink: 0;
+	/* Darken light SVG icons to match dashicon color (#50575e) */
+	filter: invert(35%) sepia(5%) saturate(300%) hue-rotate(180deg) brightness(0.6);
 }
 
 .tidy-item-title {

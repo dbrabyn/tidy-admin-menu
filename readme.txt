@@ -4,7 +4,7 @@ Tags: admin menu, dashboard, menu order, hide menu, admin customization
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,6 +17,7 @@ Tidy Admin Menu helps you organize your WordPress admin sidebar by letting you:
 * **Drag and drop** menu items to reorder them
 * **Hide** menu items you don't use
 * **Add separators** between menu groups
+* **Configure by role** - different menus for admins, editors, etc.
 * **Show All toggle** to temporarily reveal hidden items
 
 Perfect for cleaning up cluttered admin menus on sites with many plugins, or for simplifying the dashboard for clients.
@@ -86,6 +87,9 @@ The toggle only appears if you have hidden at least one menu item.
 3. Hidden items revealed with visual indicator
 
 == Changelog ==
+
+= 1.0.1 =
+* Fixed visibility of light-colored SVG menu icons on settings page
 
 = 1.0.0 =
 * Initial release
