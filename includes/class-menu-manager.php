@@ -421,8 +421,10 @@ class Menu_Manager {
 			}
 
 			// Remove notification bubbles (e.g., "Comments 5" -> "Comments").
-			// Use non-greedy match to avoid consuming text between spans.
-			$title = preg_replace( '/ ?<span[^>]*>.*?<\/span>/s', '', $title );
+			// Match optional space (regular or non-breaking) before span tags.
+			$title = preg_replace( '/[\s\xC2\xA0]?<span[^>]*>.*?<\/span>/su', '', $title );
+			// Replace <br> tags with spaces before stripping (ACF options pages use <br> in menu titles).
+			$title = preg_replace( '/<br\s*\/?>/i', ' ', $title );
 			$title = wp_strip_all_tags( $title );
 			$title = trim( $title );
 			$icon  = isset( $item[6] ) ? $item[6] : '';
