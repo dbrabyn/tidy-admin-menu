@@ -18,12 +18,15 @@
 	function init() {
 		var button = document.querySelector( '.tidy-show-all-btn' );
 
+		// Check initial state from sessionStorage.
+		var isActive = sessionStorage.getItem( STORAGE_KEY ) === 'true';
+
+		// Always update empty separators on load, even if no button.
+		updateEmptySeparators( isActive );
+
 		if ( ! button ) {
 			return;
 		}
-
-		// Check initial state from sessionStorage.
-		var isActive = sessionStorage.getItem( STORAGE_KEY ) === 'true';
 
 		// Apply initial state.
 		updateState( isActive );
@@ -76,6 +79,89 @@
 		} else {
 			document.body.classList.remove( 'tidy-show-all-active' );
 		}
+
+		// Update empty separator visibility.
+		updateEmptySeparators( isActive );
+	}
+
+	/**
+	 * Hide separators that have no visible items between them.
+	 *
+	 * When Show All is inactive, separators that only have hidden items
+	 * between them (or are at the start/end) should be hidden.
+	 *
+	 * @param {boolean} showAll Whether Show All mode is active.
+	 */
+	function updateEmptySeparators( showAll ) {
+		var menu = document.getElementById( 'adminmenu' );
+
+		if ( ! menu ) {
+			return;
+		}
+
+		// Get direct children only (not nested submenu items).
+		var items = menu.querySelectorAll( ':scope > li' );
+
+		// First pass: reset all separator classes.
+		items.forEach( function( item ) {
+			item.classList.remove( 'tidy-empty-separator' );
+		} );
+
+		// If showing all, don't hide any separators.
+		if ( showAll ) {
+			return;
+		}
+
+		// Second pass: find and mark empty separators.
+		var lastSeparator = null;
+		var hasVisibleSinceLastSeparator = false;
+
+		items.forEach( function( item ) {
+			// Skip the Show All toggle wrapper.
+			if ( item.classList.contains( 'tidy-show-all-wrapper' ) ) {
+				return;
+			}
+
+			var isSeparator = item.classList.contains( 'wp-menu-separator' );
+			var isHidden = item.classList.contains( 'tidy-hidden-item' );
+
+			if ( isSeparator ) {
+				// If we had a previous separator and no visible items since, hide this one.
+				if ( lastSeparator !== null && ! hasVisibleSinceLastSeparator ) {
+					item.classList.add( 'tidy-empty-separator' );
+				}
+				lastSeparator = item;
+				hasVisibleSinceLastSeparator = false;
+			} else if ( ! isHidden ) {
+				// Visible non-separator item.
+				hasVisibleSinceLastSeparator = true;
+			}
+			// Hidden items don't count as visible content.
+		} );
+
+		// Handle trailing separator (no visible items after it).
+		if ( lastSeparator !== null && ! hasVisibleSinceLastSeparator ) {
+			lastSeparator.classList.add( 'tidy-empty-separator' );
+		}
+
+		// Third pass: hide leading separators (before any visible content).
+		var foundVisible = false;
+		items.forEach( function( item ) {
+			if ( item.classList.contains( 'tidy-show-all-wrapper' ) ) {
+				return;
+			}
+
+			var isSeparator = item.classList.contains( 'wp-menu-separator' );
+			var isHidden = item.classList.contains( 'tidy-hidden-item' );
+
+			if ( ! foundVisible ) {
+				if ( isSeparator ) {
+					item.classList.add( 'tidy-empty-separator' );
+				} else if ( ! isHidden ) {
+					foundVisible = true;
+				}
+			}
+		} );
 	}
 
 	// Initialize when DOM is ready.

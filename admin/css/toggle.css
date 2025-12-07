@@ -75,6 +75,11 @@
 	display: none;
 }
 
+/* Empty separators - hide when no visible items between them */
+#adminmenu .tidy-empty-separator {
+	display: none;
+}
+
 /* Hidden menu items - visible when Show All is active */
 body.tidy-show-all-active #adminmenu .tidy-hidden-item {
 	display: block;
