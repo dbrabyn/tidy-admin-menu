@@ -117,15 +117,18 @@ class Admin_Settings {
 				'activeRole'    => $active_role,
 				'standardRoles' => $standard_roles,
 				'strings'       => array(
-					'unsaved'       => __( 'Unsaved changes', 'tidy-admin-menu' ),
-					'saving'        => __( 'Saving...', 'tidy-admin-menu' ),
-					'saved'         => __( 'Saved', 'tidy-admin-menu' ),
-					'error'         => __( 'Error saving. Please try again.', 'tidy-admin-menu' ),
-					'separator'     => __( 'Separator', 'tidy-admin-menu' ),
-					'noFileChosen'  => __( 'No file chosen', 'tidy-admin-menu' ),
-					'confirmReset'  => __( 'Are you sure you want to reset the menu to default? This will restore the original WordPress menu order and show all hidden items.', 'tidy-admin-menu' ),
-					'resetSuccess'  => __( 'Menu reset to default.', 'tidy-admin-menu' ),
-					'resetError'    => __( 'Error resetting menu. Please try again.', 'tidy-admin-menu' ),
+					'unsaved'            => __( 'Unsaved changes', 'tidy-admin-menu' ),
+					'saving'             => __( 'Saving...', 'tidy-admin-menu' ),
+					'saved'              => __( 'Saved', 'tidy-admin-menu' ),
+					'error'              => __( 'Error saving. Please try again.', 'tidy-admin-menu' ),
+					'separator'          => __( 'Separator', 'tidy-admin-menu' ),
+					'noFileChosen'       => __( 'No file chosen', 'tidy-admin-menu' ),
+					'confirmReset'       => __( 'Are you sure you want to reset the menu to default? This will restore the original WordPress menu order and show all hidden items.', 'tidy-admin-menu' ),
+					'resetSuccess'       => __( 'Menu reset to default.', 'tidy-admin-menu' ),
+					'resetError'         => __( 'Error resetting menu. Please try again.', 'tidy-admin-menu' ),
+					'confirmSwitchRole'  => __( 'You have unsaved changes. Are you sure you want to switch roles? Your changes will be lost.', 'tidy-admin-menu' ),
+					'selectFileToImport' => __( 'Please select a file to import.', 'tidy-admin-menu' ),
+					'removeSeparator'    => __( 'Remove separator', 'tidy-admin-menu' ),
 				),
 			)
 		);
@@ -309,7 +312,10 @@ class Admin_Settings {
 										<input type="checkbox"
 											class="tidy-visibility-toggle"
 											<?php checked( ! $is_hidden ); ?>
-											aria-label="<?php echo esc_attr( sprintf( __( 'Show %s in menu', 'tidy-admin-menu' ), $item['title'] ) ); ?>">
+											aria-label="<?php
+									/* translators: %s: Menu item title */
+									echo esc_attr( sprintf( __( 'Show %s in menu', 'tidy-admin-menu' ), $item['title'] ) );
+									?>">
 										<?php if ( $item['icon'] && strpos( $item['icon'], 'dashicons-' ) === 0 ) : ?>
 											<span class="dashicons <?php echo esc_attr( $item['icon'] ); ?>"></span>
 										<?php elseif ( $item['icon'] && strpos( $item['icon'], 'data:' ) === 0 ) : ?>

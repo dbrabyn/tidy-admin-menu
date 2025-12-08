@@ -4,7 +4,7 @@ Tags: admin menu, dashboard, menu order, hide menu, admin customization
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.8
+Stable tag: 1.0.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -87,6 +87,11 @@ The toggle only appears if you have hidden at least one menu item.
 3. Hidden items revealed with visual indicator
 
 == Changelog ==
+
+= 1.0.9 =
+* Added internationalization support with French translation
+* Fixed hardcoded JavaScript strings for full i18n compatibility
+* Added proper singular/plural forms for conflict warning messages
 
 = 1.0.8 =
 * Fixed fatal error on activation caused by missing Parsedown library files

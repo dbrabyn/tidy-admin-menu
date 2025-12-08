@@ -137,7 +137,7 @@
 				}
 
 				if ( self.hasUnsavedChanges ) {
-					if ( ! confirm( 'You have unsaved changes. Are you sure you want to switch roles? Your changes will be lost.' ) ) {
+					if ( ! confirm( tidyAdminMenu.strings.confirmSwitchRole ) ) {
 						e.preventDefault();
 						return false;
 					}
@@ -232,7 +232,7 @@
 					'<span class="tidy-separator-label">' + tidyAdminMenu.strings.separator + '</span>' +
 					'<span class="tidy-separator-line"></span>' +
 				'</span>' +
-				'<button type="button" class="tidy-remove-separator button-link" aria-label="Remove separator">' +
+				'<button type="button" class="tidy-remove-separator button-link" aria-label="' + tidyAdminMenu.strings.removeSeparator + '">' +
 					'<span class="dashicons dashicons-no-alt"></span>' +
 				'</button>' +
 			'</li>';
@@ -461,7 +461,7 @@
 			var fileInput = document.getElementById( 'tidy-import-file' );
 
 			if ( ! fileInput.files.length ) {
-				alert( 'Please select a file to import.' );
+				alert( tidyAdminMenu.strings.selectFileToImport );
 				return;
 			}
 
