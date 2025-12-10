@@ -75,6 +75,33 @@
 				opacity: 0.8,
 				update: function() {
 					self.markUnsaved();
+				},
+				stop: function() {
+					// Re-sync class state with checkbox state after sorting.
+					self.syncVisibilityClasses();
+				}
+			} );
+		},
+
+		/**
+		 * Sync visibility classes with checkbox states.
+		 *
+		 * Ensures the tidy-is-hidden class matches the checkbox state
+		 * after DOM manipulation (e.g., sorting). Also removes any
+		 * inline opacity styles left by jQuery UI Sortable.
+		 */
+		syncVisibilityClasses: function() {
+			$( '#tidy-menu-list .tidy-menu-item' ).each( function() {
+				var $item = $( this );
+				// Remove inline opacity style left by jQuery UI Sortable.
+				$item.css( 'opacity', '' );
+				var $checkbox = $item.find( '.tidy-visibility-toggle' );
+				if ( $checkbox.length ) {
+					if ( $checkbox.prop( 'checked' ) ) {
+						$item.removeClass( 'tidy-is-hidden' );
+					} else {
+						$item.addClass( 'tidy-is-hidden' );
+					}
 				}
 			} );
 		},
@@ -93,7 +120,11 @@
 			// Visibility toggle.
 			$( document ).on( 'change', '.tidy-visibility-toggle', function() {
 				var $item = $( this ).closest( '.tidy-menu-item' );
-				$item.toggleClass( 'tidy-is-hidden', ! this.checked );
+				if ( this.checked ) {
+					$item.removeClass( 'tidy-is-hidden' );
+				} else {
+					$item.addClass( 'tidy-is-hidden' );
+				}
 				self.updateShowAllCheckbox();
 				self.markUnsaved();
 			} );
