@@ -268,7 +268,7 @@
 				'</button>' +
 			'</li>';
 
-			$( '#tidy-menu-list' ).append( html );
+			$( '#tidy-menu-list' ).prepend( html );
 			this.markUnsaved();
 		},
 

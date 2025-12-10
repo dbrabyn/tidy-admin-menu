@@ -4,7 +4,7 @@ Tags: admin menu, dashboard, menu order, hide menu, admin customization
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.11
+Stable tag: 1.0.12
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -87,6 +87,9 @@ The toggle only appears if you have hidden at least one menu item.
 3. Hidden items revealed with visual indicator
 
 == Changelog ==
+
+= 1.0.12 =
+* New separators now added to top of menu list instead of bottom
 
 = 1.0.11 =
 * Fixed hidden item opacity not restoring after drag-drop reordering on settings page
