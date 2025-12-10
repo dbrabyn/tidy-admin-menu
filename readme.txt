@@ -4,7 +4,7 @@ Tags: admin menu, dashboard, menu order, hide menu, admin customization
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.9
+Stable tag: 1.0.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,7 +48,7 @@ Perfect for cleaning up cluttered admin menus on sites with many plugins, or for
 This plugin:
 
 * Does not collect any user data
-* Does not use cookies (only sessionStorage for the Show All toggle state)
+* Does not use cookies or persistent storage
 * Stores settings in your WordPress database only
 * Checks GitHub for plugin updates (no personal data is transmitted)
 
@@ -87,6 +87,10 @@ The toggle only appears if you have hidden at least one menu item.
 3. Hidden items revealed with visual indicator
 
 == Changelog ==
+
+= 1.0.10 =
+* Changed "More" toggle to reset on page reload (no longer persists across navigation)
+* Hidden menu items now show when visiting their page, then hide again when navigating away
 
 = 1.0.9 =
 * Added internationalization support with French translation

@@ -10,33 +10,24 @@
 ( function() {
 	'use strict';
 
-	var STORAGE_KEY = 'tidy_admin_menu_show_all';
-
 	/**
 	 * Initialize the toggle functionality.
 	 */
 	function init() {
 		var button = document.querySelector( '.tidy-show-all-btn' );
 
-		// Check initial state from sessionStorage.
-		var isActive = sessionStorage.getItem( STORAGE_KEY ) === 'true';
-
-		// Always update empty separators on load, even if no button.
-		updateEmptySeparators( isActive );
+		// Always start with hidden items collapsed (reset on page load).
+		updateEmptySeparators( false );
 
 		if ( ! button ) {
 			return;
 		}
-
-		// Apply initial state.
-		updateState( isActive );
 
 		// Bind click event.
 		button.addEventListener( 'click', function( e ) {
 			e.preventDefault();
 			var newState = ! ( button.getAttribute( 'aria-pressed' ) === 'true' );
 			updateState( newState );
-			sessionStorage.setItem( STORAGE_KEY, newState.toString() );
 		} );
 
 		// Handle keyboard.
@@ -124,6 +115,7 @@
 
 			var isSeparator = item.classList.contains( 'wp-menu-separator' );
 			var isHidden = item.classList.contains( 'tidy-hidden-item' );
+			var isCurrent = item.classList.contains( 'current' ) || item.classList.contains( 'wp-has-current-submenu' );
 
 			if ( isSeparator ) {
 				// If we had a previous separator and no visible items since, hide this one.
@@ -132,11 +124,11 @@
 				}
 				lastSeparator = item;
 				hasVisibleSinceLastSeparator = false;
-			} else if ( ! isHidden ) {
-				// Visible non-separator item.
+			} else if ( ! isHidden || isCurrent ) {
+				// Visible non-separator item (hidden items that are current count as visible).
 				hasVisibleSinceLastSeparator = true;
 			}
-			// Hidden items don't count as visible content.
+			// Hidden items (not current) don't count as visible content.
 		} );
 
 		// Handle trailing separator (no visible items after it).
@@ -153,11 +145,12 @@
 
 			var isSeparator = item.classList.contains( 'wp-menu-separator' );
 			var isHidden = item.classList.contains( 'tidy-hidden-item' );
+			var isCurrent = item.classList.contains( 'current' ) || item.classList.contains( 'wp-has-current-submenu' );
 
 			if ( ! foundVisible ) {
 				if ( isSeparator ) {
 					item.classList.add( 'tidy-empty-separator' );
-				} else if ( ! isHidden ) {
+				} else if ( ! isHidden || isCurrent ) {
 					foundVisible = true;
 				}
 			}

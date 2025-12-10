@@ -75,6 +75,12 @@
 	display: none;
 }
 
+/* Exception: show current/active hidden item (when visiting that page) */
+#adminmenu .tidy-hidden-item.current,
+#adminmenu .tidy-hidden-item.wp-has-current-submenu {
+	display: block;
+}
+
 /* Empty separators - hide when no visible items between them */
 #adminmenu .tidy-empty-separator {
 	display: none;
