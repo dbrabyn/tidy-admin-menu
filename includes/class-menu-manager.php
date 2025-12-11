@@ -298,8 +298,8 @@ class Menu_Manager {
 		}
 
 		$button_label = esc_attr__( 'Show hidden menu items', 'tidy-admin-menu' );
-		$text_more    = esc_html__( 'More', 'tidy-admin-menu' );
-		$text_less    = esc_html__( 'Less', 'tidy-admin-menu' );
+		$text_more    = esc_html__( 'More menu', 'tidy-admin-menu' );
+		$text_less    = esc_html__( 'Less menu', 'tidy-admin-menu' );
 
 		?>
 		<script>

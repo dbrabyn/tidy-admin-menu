@@ -3,7 +3,7 @@
  * Plugin Name: Tidy Admin Menu
  * Plugin URI: https://github.com/dbrabyn/tidy-admin-menu
  * Description: Declutter your WordPress dashboard by sorting and hiding admin menu items with a simple Show All toggle.
- * Version: 1.0.12
+ * Version: 1.0.13
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * Author: David Brabyn

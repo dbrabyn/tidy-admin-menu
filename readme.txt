@@ -4,7 +4,7 @@ Tags: admin menu, dashboard, menu order, hide menu, admin customization
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.12
+Stable tag: 1.0.13
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -87,6 +87,9 @@ The toggle only appears if you have hidden at least one menu item.
 3. Hidden items revealed with visual indicator
 
 == Changelog ==
+
+= 1.0.13 =
+* Changed toggle button text from "More/Less" to "More menu/Less menu" for clarity
 
 = 1.0.12 =
 * New separators now added to top of menu list instead of bottom
