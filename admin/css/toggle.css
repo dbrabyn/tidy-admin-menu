@@ -22,7 +22,7 @@
 .tidy-show-all-btn {
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	justify-content: start;
 	gap: 8px;
 	width: 100%;
 	padding: 12px 10px;
@@ -119,4 +119,3 @@ body.tidy-show-all-active #adminmenu .tidy-hidden-item:hover {
 		border-left-width: 4px !important;
 	}
 }
-
