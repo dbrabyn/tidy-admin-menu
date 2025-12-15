@@ -207,6 +207,9 @@ class Admin_Settings {
 		// Get menu items - filter by role if in role mode.
 		$menu_items = Menu_Manager::get_all_menu_items( $active_role );
 
+		// Check for unmanageable menu items (empty slugs).
+		$unmanageable_items = Menu_Manager::get_unmanageable_menu_items();
+
 		// Get config for current context.
 		$config       = $this->get_current_config( $apply_to, $active_role );
 		$menu_order   = $config['order'];
@@ -237,6 +240,20 @@ class Admin_Settings {
 		<div class="wrap tidy-admin-menu-wrap">
 			<h1><?php esc_html_e( 'Tidy Admin Menu', 'tidy-admin-menu' ); ?></h1>
 			<p class="description"><?php esc_html_e( 'Drag and drop menu items to reorder. Uncheck items to hide them from the admin menu.', 'tidy-admin-menu' ); ?></p>
+
+			<?php if ( ! empty( $unmanageable_items ) ) : ?>
+				<div class="notice notice-warning">
+					<p>
+						<?php
+						printf(
+							/* translators: %s: comma-separated list of menu item names */
+							esc_html__( 'The following menu items cannot be reordered because they are missing a menu slug: %s. The plugin or theme registering these items should specify a menu_slug parameter.', 'tidy-admin-menu' ),
+							'<strong>' . esc_html( implode( ', ', $unmanageable_items ) ) . '</strong>'
+						);
+						?>
+					</p>
+				</div>
+			<?php endif; ?>
 
 			<div class="tidy-admin-menu-container">
 				<div class="tidy-menu-list-wrapper">

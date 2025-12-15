@@ -174,8 +174,9 @@ class Menu_Manager {
 		}
 
 		// Add remaining items that weren't in custom order.
+		// Skip empty slugs which can't be reliably ordered.
 		foreach ( $menu_order as $item ) {
-			if ( ! in_array( $item, $new_order, true ) ) {
+			if ( '' !== $item && ! in_array( $item, $new_order, true ) ) {
 				$new_order[] = $item;
 			}
 		}
@@ -232,8 +233,9 @@ class Menu_Manager {
 		$menu_by_slug = array();
 
 		// Index menu items by slug for quick lookup.
+		// Skip items with empty slugs (e.g., ACF options pages without menu_slug).
 		foreach ( $menu as $key => $item ) {
-			if ( isset( $item[2] ) ) {
+			if ( isset( $item[2] ) && '' !== $item[2] ) {
 				$menu_by_slug[ $item[2] ] = $item;
 			}
 		}
@@ -273,7 +275,11 @@ class Menu_Manager {
 		// The actual hiding is done via CSS when Show All is not active.
 		// We add a data attribute to hidden items for CSS targeting.
 		foreach ( $menu as $key => $item ) {
-			if ( isset( $item[2] ) && in_array( $item[2], $hidden, true ) ) {
+			// Skip items with empty slugs.
+			if ( ! isset( $item[2] ) || '' === $item[2] ) {
+				continue;
+			}
+			if ( in_array( $item[2], $hidden, true ) ) {
 				// Add a class to mark as hidden by Tidy Admin Menu.
 				if ( ! isset( $menu[ $key ][4] ) ) {
 					$menu[ $key ][4] = '';
@@ -379,6 +385,52 @@ class Menu_Manager {
 	}
 
 	/**
+	 * Get menu items that have empty slugs and cannot be managed.
+	 *
+	 * @return array Array of menu item titles that have empty slugs.
+	 */
+	public static function get_unmanageable_menu_items() {
+		global $menu;
+
+		$unmanageable = array();
+
+		if ( ! is_array( $menu ) ) {
+			return $unmanageable;
+		}
+
+		foreach ( $menu as $item ) {
+			// Skip completely empty items and separators.
+			if ( empty( $item[0] ) && empty( $item[2] ) ) {
+				continue;
+			}
+
+			$slug  = isset( $item[2] ) ? $item[2] : '';
+			$title = isset( $item[0] ) ? $item[0] : '';
+			$class = isset( $item[4] ) ? $item[4] : '';
+
+			// Skip separators.
+			if ( strpos( $class, 'wp-menu-separator' ) !== false ) {
+				continue;
+			}
+
+			// Check for empty slug with a title (actual menu item, not separator).
+			if ( '' === $slug && '' !== $title ) {
+				// Clean up the title for display.
+				$title = preg_replace( '/[\s\xC2\xA0]?<span[^>]*>.*?<\/span>/su', '', $title );
+				$title = preg_replace( '/<br\s*\/?>/i', ' ', $title );
+				$title = wp_strip_all_tags( $title );
+				$title = trim( $title );
+
+				if ( '' !== $title ) {
+					$unmanageable[] = $title;
+				}
+			}
+		}
+
+		return $unmanageable;
+	}
+
+	/**
 	 * Get all current menu items for the settings page.
 	 *
 	 * @param string $for_role Optional. Filter items by what this role can access.
@@ -411,6 +463,12 @@ class Menu_Manager {
 			$slug       = isset( $item[2] ) ? $item[2] : '';
 			$title      = isset( $item[0] ) ? $item[0] : '';
 			$capability = isset( $item[1] ) ? $item[1] : '';
+
+			// Skip items with empty slugs (e.g., ACF options pages without menu_slug).
+			// These items can't be reliably reordered since they have no identifier.
+			if ( '' === $slug ) {
+				continue;
+			}
 
 			// Filter by role capability if specified.
 			if ( ! empty( $for_role ) && ! empty( $capability ) ) {
