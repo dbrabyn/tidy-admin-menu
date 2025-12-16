@@ -153,30 +153,54 @@ class Menu_Manager {
 	/**
 	 * Apply custom menu order.
 	 *
-	 * @param array $menu_order Default menu order.
+	 * WordPress's menu_order filter only receives core menu items by default.
+	 * Plugin-added menu items (via add_menu_page) are NOT in this array.
+	 * We need to build a complete order from the global $menu array.
+	 *
+	 * @param array $menu_order Default menu order (often incomplete).
 	 * @return array Modified menu order.
 	 */
 	public function apply_menu_order( $menu_order ) {
+		global $menu;
+
 		$custom_order = $this->get_menu_order();
 
 		if ( empty( $custom_order ) ) {
 			return $menu_order;
 		}
 
+		// Build complete menu order from the global $menu array.
+		// This ensures we include ALL menu items, not just core ones.
+		$complete_menu_order = array();
+		if ( is_array( $menu ) ) {
+			// Sort by key (position) to get current order.
+			$sorted_menu = $menu;
+			ksort( $sorted_menu );
+			foreach ( $sorted_menu as $item ) {
+				if ( isset( $item[2] ) && '' !== $item[2] ) {
+					$complete_menu_order[] = $item[2];
+				}
+			}
+		}
+
 		// Start with custom order.
 		$new_order = array();
 
+		// Track which items from the complete menu we've processed.
+		$processed = array();
+
 		// Add items from custom order that exist in the menu.
 		foreach ( $custom_order as $item ) {
-			if ( in_array( $item, $menu_order, true ) || strpos( $item, 'separator' ) === 0 ) {
-				$new_order[] = $item;
+			if ( in_array( $item, $complete_menu_order, true ) || strpos( $item, 'separator' ) === 0 ) {
+				$new_order[]          = $item;
+				$processed[ $item ] = true;
 			}
 		}
 
 		// Add remaining items that weren't in custom order.
-		// Skip empty slugs which can't be reliably ordered.
-		foreach ( $menu_order as $item ) {
-			if ( '' !== $item && ! in_array( $item, $new_order, true ) ) {
+		// These retain their original relative order from the menu.
+		foreach ( $complete_menu_order as $item ) {
+			if ( '' !== $item && ! isset( $processed[ $item ] ) ) {
 				$new_order[] = $item;
 			}
 		}
@@ -234,24 +258,36 @@ class Menu_Manager {
 
 		// Index menu items by slug for quick lookup.
 		// Skip items with empty slugs (e.g., ACF options pages without menu_slug).
+		// Preserve original position for items not in custom order.
 		foreach ( $menu as $key => $item ) {
 			if ( isset( $item[2] ) && '' !== $item[2] ) {
-				$menu_by_slug[ $item[2] ] = $item;
+				$menu_by_slug[ $item[2] ] = array(
+					'item'              => $item,
+					'original_position' => $key,
+				);
 			}
 		}
 
 		// Add items from custom order first.
 		foreach ( $custom_order as $slug ) {
 			if ( isset( $menu_by_slug[ $slug ] ) ) {
-				$new_menu[ $position ] = $menu_by_slug[ $slug ];
+				$new_menu[ $position ] = $menu_by_slug[ $slug ]['item'];
 				unset( $menu_by_slug[ $slug ] );
 				$position++;
 			}
 		}
 
-		// Add remaining items that weren't in custom order.
-		foreach ( $menu_by_slug as $slug => $item ) {
-			$new_menu[ $position ] = $item;
+		// Sort remaining items by their original position before adding.
+		uasort(
+			$menu_by_slug,
+			function ( $a, $b ) {
+				return $a['original_position'] - $b['original_position'];
+			}
+		);
+
+		// Add remaining items that weren't in custom order, preserving their relative order.
+		foreach ( $menu_by_slug as $slug => $data ) {
+			$new_menu[ $position ] = $data['item'];
 			$position++;
 		}
 
