@@ -8,27 +8,12 @@
  * @since 1.0.0
  */
 
-/* Add padding to adminmenu to prevent toggle from covering last items */
-#adminmenu.tidy-has-toggle {
-	padding-bottom: 46px;
-}
-
-/* Show All toggle wrapper */
+/* Show All toggle wrapper - flows naturally after last menu item */
 .tidy-show-all-wrapper {
-	position: fixed;
-	bottom: 0;
-	left: 0;
-	width: 160px;
 	background: #1d2327;
 	border-top: 1px solid #3c434a;
 	padding: 0 !important;
 	margin: 0 !important;
-	z-index: 9999;
-}
-
-/* Adjust toggle width when menu is folded */
-.folded .tidy-show-all-wrapper {
-	width: 36px;
 }
 
 /* Show All button */

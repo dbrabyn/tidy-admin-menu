@@ -312,7 +312,6 @@ class Menu_Manager {
 		(function() {
 			var adminMenu = document.getElementById('adminmenu');
 			if (adminMenu) {
-				adminMenu.classList.add('tidy-has-toggle');
 				var li = document.createElement('li');
 				li.id = 'tidy-show-all-toggle';
 				li.className = 'tidy-show-all-wrapper';
@@ -320,7 +319,7 @@ class Menu_Manager {
 					'<span class="tidy-toggle-icon">+</span>' +
 					'<span class="tidy-toggle-text"><?php echo $text_more; ?></span>' +
 					'</button>';
-				adminMenu.parentNode.appendChild(li);
+				adminMenu.appendChild(li);
 			}
 		})();
 		</script>
