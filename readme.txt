@@ -1,6 +1,6 @@
 === Tidy Admin Menu ===
-Contributors: developerdavid
-Tags: admin menu, dashboard, menu order, hide menu, admin customization
+Contributors: dbrabyn
+Tags: admin menu, menu order, hide menu, admin customization, tidy admin menu
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
