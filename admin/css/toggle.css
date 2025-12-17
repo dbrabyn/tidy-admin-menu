@@ -90,13 +90,20 @@ body.tidy-show-all-active #adminmenu .tidy-hidden-item {
 	opacity: 0.85;
 }
 
-/* Ensure admin menu is scrollable when Show All is active */
+/* Make adminmenuwrap scrollable when Show All is active */
 body.tidy-show-all-active #adminmenuwrap {
+	position: fixed !important;
+	top: 32px; /* Below admin bar */
+	bottom: 46px; /* Above collapse button */
+	left: 0;
 	overflow-y: auto;
 }
 
-body.tidy-show-all-active #adminmenu {
-	overflow: visible;
+/* Mobile admin bar is 46px tall */
+@media screen and (max-width: 782px) {
+	body.tidy-show-all-active #adminmenuwrap {
+		top: 46px;
+	}
 }
 
 body.tidy-show-all-active #adminmenu .tidy-hidden-item > a {
