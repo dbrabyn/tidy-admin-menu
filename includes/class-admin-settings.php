@@ -353,6 +353,13 @@ class Admin_Settings {
 						<span class="dashicons dashicons-info-outline"></span>
 						<?php esc_html_e( 'Tip: Use keyboard arrows with Alt key to reorder items.', 'tidy-admin-menu' ); ?>
 					</p>
+
+					<div class="tidy-extra-options">
+						<label>
+							<input type="checkbox" id="tidy-hide-collapse-menu" <?php checked( ! empty( $settings['hide_collapse_menu'] ) ); ?>>
+							<?php esc_html_e( 'Hide "Collapse menu" toggle', 'tidy-admin-menu' ); ?>
+						</label>
+					</div>
 				</div>
 
 				<div class="tidy-settings-panel">

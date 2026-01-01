@@ -4,7 +4,7 @@ Tags: admin menu, menu order, hide menu, admin customization, tidy admin menu
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.19
+Stable tag: 1.0.20
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -87,6 +87,9 @@ The toggle only appears if you have hidden at least one menu item.
 3. Hidden items revealed with visual indicator
 
 == Changelog ==
+
+= 1.0.20 =
+* Added option to hide the "Collapse menu" toggle in the admin sidebar
 
 = 1.0.19 =
 * Fixed admin menu scrolling when Show All toggle is active using fixed positioning on menu wrapper

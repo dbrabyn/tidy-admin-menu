@@ -165,6 +165,12 @@ class Ajax_Handler {
 			update_option( 'tidy_admin_menu_hidden', $sanitized_hidden, false );
 		}
 
+		// Save hide_collapse_menu setting (global setting, not per-role/user).
+		$hide_collapse_menu = isset( $_POST['hide_collapse_menu'] ) && 'true' === $_POST['hide_collapse_menu'];
+		$settings           = get_option( 'tidy_admin_menu_settings', array() );
+		$settings['hide_collapse_menu'] = $hide_collapse_menu;
+		update_option( 'tidy_admin_menu_settings', $settings, true );
+
 		wp_send_json_success( array( 'message' => __( 'Settings saved.', 'tidy-admin-menu' ) ) );
 	}
 
@@ -209,8 +215,12 @@ class Ajax_Handler {
 			$apply_to = 'all';
 		}
 
+		// Get hide_collapse_menu setting.
+		$hide_collapse_menu = isset( $_POST['hide_collapse_menu'] ) && 'true' === $_POST['hide_collapse_menu'];
+
 		$settings = array(
-			'apply_to' => $apply_to,
+			'apply_to'           => $apply_to,
+			'hide_collapse_menu' => $hide_collapse_menu,
 		);
 
 		update_option( 'tidy_admin_menu_settings', $settings, true ); // Autoload settings.

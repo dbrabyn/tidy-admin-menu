@@ -159,6 +159,11 @@
 				self.saveSettings();
 			} );
 
+			// Hide collapse menu checkbox change.
+			$( '#tidy-hide-collapse-menu' ).on( 'change', function() {
+				self.markUnsaved();
+			} );
+
 			// Role tab clicks - warn about unsaved changes.
 			$( document ).on( 'click', '.tidy-role-tabs .nav-tab', function( e ) {
 				// Don't do anything for disabled tabs.
@@ -322,11 +327,14 @@
 			this.updateStatus( 'saving' );
 			$( '#tidy-save-settings' ).prop( 'disabled', true );
 
+			var hideCollapseMenu = $( '#tidy-hide-collapse-menu' ).prop( 'checked' );
+
 			var postData = {
 				action: 'tidy_save_all_settings',
 				nonce: tidyAdminMenu.nonce,
 				order: order,
-				hidden: hidden
+				hidden: hidden,
+				hide_collapse_menu: hideCollapseMenu ? 'true' : 'false'
 			};
 
 			// Include role if in role mode.
@@ -417,13 +425,15 @@
 		saveSettings: function() {
 			var self = this;
 			var applyTo = $( 'input[name="tidy_apply_to"]:checked' ).val();
+			var hideCollapseMenu = $( '#tidy-hide-collapse-menu' ).prop( 'checked' );
 
 			this.updateStatus( 'saving' );
 
 			$.post( tidyAdminMenu.ajaxUrl, {
 				action: 'tidy_save_settings',
 				nonce: tidyAdminMenu.nonce,
-				apply_to: applyTo
+				apply_to: applyTo,
+				hide_collapse_menu: hideCollapseMenu ? 'true' : 'false'
 			} )
 			.done( function( response ) {
 				if ( response.success ) {

@@ -321,6 +321,25 @@
 	height: 16px;
 }
 
+/* Extra options */
+.tidy-extra-options {
+	margin-top: 15px;
+	padding-top: 15px;
+	border-top: 1px solid #dcdcde;
+}
+
+.tidy-extra-options label {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	cursor: pointer;
+	font-size: 13px;
+}
+
+.tidy-extra-options input[type="checkbox"] {
+	margin: 0;
+}
+
 /* Settings panel */
 .tidy-settings-panel h2 {
 	margin-top: 0;

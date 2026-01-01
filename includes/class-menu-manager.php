@@ -375,9 +375,11 @@ class Menu_Manager {
 	}
 
 	/**
-	 * Output inline styles for admin menu separators.
+	 * Output inline styles for admin menu separators and hide collapse menu.
 	 */
 	public function separator_styles() {
+		$settings           = get_option( 'tidy_admin_menu_settings', array() );
+		$hide_collapse_menu = ! empty( $settings['hide_collapse_menu'] );
 		?>
 		<style>
 		#adminmenu li.wp-menu-separator {
@@ -389,6 +391,11 @@ class Menu_Manager {
 			padding: 0;
 			border-top: 1px solid #555;
 		}
+		<?php if ( $hide_collapse_menu ) : ?>
+		#collapse-menu {
+			display: none !important;
+		}
+		<?php endif; ?>
 		</style>
 		<?php
 	}
