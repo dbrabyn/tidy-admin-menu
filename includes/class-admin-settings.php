@@ -100,23 +100,26 @@ class Admin_Settings {
 		}
 
 		// Get config for current context.
-		$config       = $this->get_current_config( $apply_to, $active_role );
-		$menu_order   = $config['order'];
-		$hidden_items = $config['hidden'];
+		$config          = $this->get_current_config( $apply_to, $active_role );
+		$menu_order      = $config['order'];
+		$hidden_items    = $config['hidden'];
+		$hidden_submenus = $config['hidden_submenus'];
 
 		// Localize script.
 		wp_localize_script(
 			'tidy-admin-menu-settings',
 			'tidyAdminMenu',
 			array(
-				'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
-				'nonce'         => wp_create_nonce( 'tidy_admin_menu_nonce' ),
-				'menuOrder'     => $menu_order,
-				'hiddenItems'   => $hidden_items,
-				'applyTo'       => $apply_to,
-				'activeRole'    => $active_role,
-				'standardRoles' => $standard_roles,
-				'strings'       => array(
+				'siteName'       => sanitize_title( get_bloginfo( 'name' ) ) ?: wp_parse_url( home_url(), PHP_URL_HOST ),
+				'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
+				'nonce'          => wp_create_nonce( 'tidy_admin_menu_nonce' ),
+				'menuOrder'      => $menu_order,
+				'hiddenItems'    => $hidden_items,
+				'hiddenSubmenus' => $hidden_submenus,
+				'applyTo'        => $apply_to,
+				'activeRole'     => $active_role,
+				'standardRoles'  => $standard_roles,
+				'strings'        => array(
 					'unsaved'            => __( 'Unsaved changes', 'tidy-admin-menu' ),
 					'saving'             => __( 'Saving...', 'tidy-admin-menu' ),
 					'saved'              => __( 'Saved', 'tidy-admin-menu' ),
@@ -129,6 +132,10 @@ class Admin_Settings {
 					'confirmSwitchRole'  => __( 'You have unsaved changes. Are you sure you want to switch roles? Your changes will be lost.', 'tidy-admin-menu' ),
 					'selectFileToImport' => __( 'Please select a file to import.', 'tidy-admin-menu' ),
 					'removeSeparator'    => __( 'Remove separator', 'tidy-admin-menu' ),
+					/* translators: %d: number of hidden submenu items */
+					'nHidden'            => __( '%d hidden', 'tidy-admin-menu' ),
+					'hideAllSubs'        => __( 'Hide all', 'tidy-admin-menu' ),
+					'showAllSubs'        => __( 'Show all', 'tidy-admin-menu' ),
 				),
 			)
 		);
@@ -139,22 +146,26 @@ class Admin_Settings {
 	 *
 	 * @param string $apply_to    The apply_to setting value.
 	 * @param string $active_role The active role being edited (for role mode).
-	 * @return array Array with 'order' and 'hidden' keys.
+	 * @return array Array with 'order', 'hidden', and 'hidden_submenus' keys.
 	 */
 	private function get_current_config( $apply_to, $active_role = '' ) {
-		$menu_order   = array();
-		$hidden_items = array();
+		$menu_order      = array();
+		$hidden_items    = array();
+		$hidden_submenus = array();
 
 		if ( 'role' === $apply_to && ! empty( $active_role ) ) {
-			$role_config  = get_option( 'tidy_admin_menu_role_' . $active_role, array() );
-			$menu_order   = isset( $role_config['order'] ) ? $role_config['order'] : array();
-			$hidden_items = isset( $role_config['hidden'] ) ? $role_config['hidden'] : array();
+			$role_config     = get_option( 'tidy_admin_menu_role_' . $active_role, array() );
+			$menu_order      = isset( $role_config['order'] ) ? $role_config['order'] : array();
+			$hidden_items    = isset( $role_config['hidden'] ) ? $role_config['hidden'] : array();
+			$hidden_submenus = isset( $role_config['hidden_submenus'] ) ? $role_config['hidden_submenus'] : array();
 		} elseif ( 'user' === $apply_to ) {
-			$menu_order   = get_user_meta( get_current_user_id(), 'tidy_admin_menu_order', true );
-			$hidden_items = get_user_meta( get_current_user_id(), 'tidy_admin_menu_hidden', true );
+			$menu_order      = get_user_meta( get_current_user_id(), 'tidy_admin_menu_order', true );
+			$hidden_items    = get_user_meta( get_current_user_id(), 'tidy_admin_menu_hidden', true );
+			$hidden_submenus = get_user_meta( get_current_user_id(), 'tidy_admin_menu_hidden_submenus', true );
 		} else {
-			$menu_order   = get_option( 'tidy_admin_menu_order', array() );
-			$hidden_items = get_option( 'tidy_admin_menu_hidden', array() );
+			$menu_order      = get_option( 'tidy_admin_menu_order', array() );
+			$hidden_items    = get_option( 'tidy_admin_menu_hidden', array() );
+			$hidden_submenus = get_option( 'tidy_admin_menu_hidden_submenus', array() );
 		}
 
 		if ( ! is_array( $menu_order ) ) {
@@ -163,10 +174,14 @@ class Admin_Settings {
 		if ( ! is_array( $hidden_items ) ) {
 			$hidden_items = array();
 		}
+		if ( ! is_array( $hidden_submenus ) ) {
+			$hidden_submenus = array();
+		}
 
 		return array(
-			'order'  => $menu_order,
-			'hidden' => $hidden_items,
+			'order'           => $menu_order,
+			'hidden'          => $hidden_items,
+			'hidden_submenus' => $hidden_submenus,
 		);
 	}
 
@@ -211,9 +226,13 @@ class Admin_Settings {
 		$unmanageable_items = Menu_Manager::get_unmanageable_menu_items();
 
 		// Get config for current context.
-		$config       = $this->get_current_config( $apply_to, $active_role );
-		$menu_order   = $config['order'];
-		$hidden_items = $config['hidden'];
+		$config          = $this->get_current_config( $apply_to, $active_role );
+		$menu_order      = $config['order'];
+		$hidden_items    = $config['hidden'];
+		$hidden_submenus = $config['hidden_submenus'];
+
+		// Get all submenu items for the settings page.
+		$all_submenus = Menu_Manager::get_all_submenu_items( $active_role );
 
 		// Sort menu items by saved order if exists.
 		if ( ! empty( $menu_order ) ) {
@@ -291,21 +310,37 @@ class Admin_Settings {
 					<div class="tidy-toolbar">
 						<label class="tidy-show-all-label">
 							<input type="checkbox" id="tidy-show-all" <?php checked( empty( $hidden_items ) ); ?>>
-							<?php esc_html_e( 'Show All Menu Items', 'tidy-admin-menu' ); ?>
+							<?php esc_html_e( 'Toggle All Menu Items', 'tidy-admin-menu' ); ?>
 						</label>
 						<button type="button" id="tidy-add-separator" class="button">
 							<span class="dashicons dashicons-minus"></span>
 							<?php esc_html_e( 'Add Separator', 'tidy-admin-menu' ); ?>
 						</button>
+						<label class="tidy-show-submenus-label">
+							<input type="checkbox" id="tidy-show-submenus">
+							<?php esc_html_e( 'Expand Submenus', 'tidy-admin-menu' ); ?>
+						</label>
 					</div>
 
 					<ul id="tidy-menu-list" class="tidy-menu-list" role="listbox" aria-label="<?php esc_attr_e( 'Admin menu items', 'tidy-admin-menu' ); ?>">
 						<?php foreach ( $menu_items as $item ) : ?>
 							<?php
-							$is_hidden = in_array( $item['slug'], $hidden_items, true );
-							$item_id   = 'tidy-item-' . sanitize_title( $item['slug'] );
+							$is_hidden    = in_array( $item['slug'], $hidden_items, true );
+							$item_id      = 'tidy-item-' . sanitize_title( $item['slug'] );
+							$item_subs    = isset( $all_submenus[ $item['slug'] ] ) ? $all_submenus[ $item['slug'] ] : array();
+							$has_subs     = ! $item['is_separator'] && ! empty( $item_subs );
+							$parent_hidden_subs = isset( $hidden_submenus[ $item['slug'] ] ) ? $hidden_submenus[ $item['slug'] ] : array();
+							$hidden_sub_count   = 0;
+							if ( $has_subs ) {
+								foreach ( $item_subs as $sub ) {
+									if ( in_array( $sub['slug'], $parent_hidden_subs, true ) ) {
+										++$hidden_sub_count;
+									}
+								}
+							}
+							$all_subs_hidden = $has_subs && $hidden_sub_count === count( $item_subs );
 							?>
-							<li class="tidy-menu-item<?php echo $item['is_separator'] ? ' tidy-separator-item' : ''; ?><?php echo $is_hidden ? ' tidy-is-hidden' : ''; ?>"
+							<li class="tidy-menu-item<?php echo $item['is_separator'] ? ' tidy-separator-item' : ''; ?><?php echo $is_hidden ? ' tidy-is-hidden' : ''; ?><?php echo $has_subs ? ' tidy-has-submenu' : ''; ?><?php echo $all_subs_hidden ? ' tidy-all-subs-hidden' : ''; ?>"
 								data-slug="<?php echo esc_attr( $item['slug'] ); ?>"
 								role="option"
 								aria-selected="false"
@@ -344,6 +379,55 @@ class Admin_Settings {
 										<?php endif; ?>
 										<span class="tidy-item-title"><?php echo esc_html( $item['title'] ); ?></span>
 									</label>
+
+									<?php if ( $has_subs ) : ?>
+										<span class="tidy-submenu-badge<?php echo $hidden_sub_count > 0 ? '' : ' tidy-badge-hidden'; ?>"
+											data-total="<?php echo count( $item_subs ); ?>">
+											<?php
+											printf(
+												/* translators: %d: number of hidden submenu items */
+												esc_html__( '%d hidden', 'tidy-admin-menu' ),
+												(int) $hidden_sub_count
+											);
+											?>
+										</span>
+										<button type="button" class="tidy-submenu-toggle" aria-expanded="false"
+											aria-label="<?php
+											/* translators: %s: Menu item title */
+											echo esc_attr( sprintf( __( 'Toggle submenus for %s', 'tidy-admin-menu' ), $item['title'] ) );
+											?>">
+											<span class="dashicons dashicons-arrow-down-alt2"></span>
+										</button>
+
+										<ul class="tidy-submenu-list">
+											<li class="tidy-submenu-bulk-toggle">
+												<label>
+													<input type="checkbox" class="tidy-parent-bulk-toggle"
+														<?php checked( 0 === $hidden_sub_count ); ?>>
+													<span class="tidy-bulk-toggle-label">
+														<?php echo 0 === $hidden_sub_count ? esc_html__( 'Hide all', 'tidy-admin-menu' ) : esc_html__( 'Show all', 'tidy-admin-menu' ); ?>
+													</span>
+												</label>
+											</li>
+											<?php foreach ( $item_subs as $sub ) : ?>
+												<?php $sub_is_hidden = in_array( $sub['slug'], $parent_hidden_subs, true ); ?>
+												<li class="tidy-submenu-item<?php echo $sub_is_hidden ? ' tidy-is-hidden' : ''; ?>"
+													data-slug="<?php echo esc_attr( $sub['slug'] ); ?>"
+													data-parent-slug="<?php echo esc_attr( $item['slug'] ); ?>">
+													<label>
+														<input type="checkbox"
+															class="tidy-submenu-visibility"
+															<?php checked( ! $sub_is_hidden ); ?>
+															aria-label="<?php
+															/* translators: %s: Submenu item title */
+															echo esc_attr( sprintf( __( 'Show %s in submenu', 'tidy-admin-menu' ), $sub['title'] ) );
+															?>">
+														<span class="tidy-submenu-title"><?php echo esc_html( $sub['title'] ); ?></span>
+													</label>
+												</li>
+											<?php endforeach; ?>
+										</ul>
+									<?php endif; ?>
 								<?php endif; ?>
 							</li>
 						<?php endforeach; ?>
@@ -359,6 +443,48 @@ class Admin_Settings {
 							<input type="checkbox" id="tidy-hide-collapse-menu" <?php checked( ! empty( $settings['hide_collapse_menu'] ) ); ?>>
 							<?php esc_html_e( 'Hide "Collapse menu" toggle', 'tidy-admin-menu' ); ?>
 						</label>
+
+						<h4><?php esc_html_e( 'Quick access: recommended submenu hides', 'tidy-admin-menu' ); ?></h4>
+
+						<div class="tidy-extra-option">
+							<label>
+								<input type="checkbox" id="tidy-hide-theme-editor" <?php checked( ! empty( $settings['hide_theme_editor'] ) ); ?>>
+								<?php esc_html_e( 'Appearance → Theme File Editor', 'tidy-admin-menu' ); ?>
+							</label>
+							<p class="description"><?php esc_html_e( 'Hides direct theme code editing — a common security recommendation.', 'tidy-admin-menu' ); ?></p>
+						</div>
+
+						<div class="tidy-extra-option">
+							<label>
+								<input type="checkbox" id="tidy-hide-plugin-editor" <?php checked( ! empty( $settings['hide_plugin_editor'] ) ); ?>>
+								<?php esc_html_e( 'Plugins → Plugin File Editor', 'tidy-admin-menu' ); ?>
+							</label>
+							<p class="description"><?php esc_html_e( 'Hides direct plugin code editing — a common security recommendation.', 'tidy-admin-menu' ); ?></p>
+						</div>
+
+						<div class="tidy-extra-option">
+							<label>
+								<input type="checkbox" id="tidy-hide-available-tools" <?php checked( ! empty( $settings['hide_available_tools'] ) ); ?>>
+								<?php esc_html_e( 'Tools → Available Tools', 'tidy-admin-menu' ); ?>
+							</label>
+							<p class="description"><?php esc_html_e( 'Removes the mostly empty Available Tools page — rarely useful in modern WordPress.', 'tidy-admin-menu' ); ?></p>
+						</div>
+
+						<div class="tidy-extra-option">
+							<label>
+								<input type="checkbox" id="tidy-hide-privacy" <?php checked( ! empty( $settings['hide_privacy'] ) ); ?>>
+								<?php esc_html_e( 'Settings → Privacy', 'tidy-admin-menu' ); ?>
+							</label>
+							<p class="description"><?php esc_html_e( 'Hides the Privacy settings page — useful once your Privacy Policy page is already set.', 'tidy-admin-menu' ); ?></p>
+						</div>
+
+						<div class="tidy-extra-option">
+							<label>
+								<input type="checkbox" id="tidy-hide-customize" <?php checked( ! empty( $settings['hide_customize'] ) ); ?>>
+								<?php esc_html_e( 'Appearance → Customize', 'tidy-admin-menu' ); ?>
+							</label>
+							<p class="description"><?php esc_html_e( 'Hides the Customizer — useful for block themes that don\'t use it.', 'tidy-admin-menu' ); ?></p>
+						</div>
 					</div>
 				</div>
 

@@ -64,6 +64,44 @@ class Ajax_Handler {
 	}
 
 	/**
+	 * Sanitize hidden submenus from POST data.
+	 *
+	 * @return array Sanitized associative array of parent_slug => array of submenu slugs.
+	 */
+	private function sanitize_hidden_submenus() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified in verify_request(), JSON decoded and sanitized per-item below.
+		$raw = isset( $_POST['hidden_submenus'] ) ? wp_unslash( $_POST['hidden_submenus'] ) : '{}';
+
+		if ( ! is_string( $raw ) ) {
+			return array();
+		}
+
+		$decoded = json_decode( $raw, true );
+
+		if ( ! is_array( $decoded ) ) {
+			return array();
+		}
+
+		$sanitized = array();
+		foreach ( $decoded as $parent_slug => $submenu_slugs ) {
+			$parent_slug = $this->sanitize_menu_slug( $parent_slug );
+			if ( empty( $parent_slug ) || ! is_array( $submenu_slugs ) ) {
+				continue;
+			}
+
+			$sanitized_slugs = array_map( array( $this, 'sanitize_menu_slug' ), $submenu_slugs );
+			$sanitized_slugs = array_filter( $sanitized_slugs );
+			$sanitized_slugs = array_values( $sanitized_slugs );
+
+			if ( ! empty( $sanitized_slugs ) ) {
+				$sanitized[ $parent_slug ] = $sanitized_slugs;
+			}
+		}
+
+		return $sanitized;
+	}
+
+	/**
 	 * Get storage method based on settings.
 	 *
 	 * @return string 'option', 'user', or 'role'.
@@ -86,6 +124,7 @@ class Ajax_Handler {
 		$this->verify_request();
 
 		// Get and sanitize menu order.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified in verify_request(), sanitized per-item below.
 		$order = isset( $_POST['order'] ) ? wp_unslash( $_POST['order'] ) : array();
 
 		if ( ! is_array( $order ) ) {
@@ -114,6 +153,7 @@ class Ajax_Handler {
 		$this->verify_request();
 
 		// Get and sanitize menu order.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified in verify_request(), sanitized per-item below.
 		$order = isset( $_POST['order'] ) ? wp_unslash( $_POST['order'] ) : array();
 
 		if ( ! is_array( $order ) ) {
@@ -126,6 +166,7 @@ class Ajax_Handler {
 		$sanitized_order = array_values( $sanitized_order );
 
 		// Get and sanitize hidden items.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified in verify_request(), sanitized per-item below.
 		$hidden = isset( $_POST['hidden'] ) ? wp_unslash( $_POST['hidden'] ) : array();
 
 		if ( ! is_array( $hidden ) ) {
@@ -137,11 +178,15 @@ class Ajax_Handler {
 		$sanitized_hidden = array_filter( $sanitized_hidden );
 		$sanitized_hidden = array_values( $sanitized_hidden );
 
+		// Get and sanitize hidden submenu items.
+		$sanitized_hidden_submenus = $this->sanitize_hidden_submenus();
+
 		$storage_method = $this->get_storage_method();
 
 		// Save based on storage method.
 		if ( 'role' === $storage_method ) {
 			// Get the role being edited.
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified in verify_request().
 			$role = isset( $_POST['role'] ) ? sanitize_text_field( wp_unslash( $_POST['role'] ) ) : '';
 
 			// Validate role exists.
@@ -152,23 +197,34 @@ class Ajax_Handler {
 
 			// Save role-specific config.
 			$role_config = array(
-				'order'  => $sanitized_order,
-				'hidden' => $sanitized_hidden,
+				'order'           => $sanitized_order,
+				'hidden'          => $sanitized_hidden,
+				'hidden_submenus' => $sanitized_hidden_submenus,
 			);
 			update_option( 'tidy_admin_menu_role_' . $role, $role_config, false );
 
 		} elseif ( 'user' === $storage_method ) {
 			update_user_meta( get_current_user_id(), 'tidy_admin_menu_order', $sanitized_order );
 			update_user_meta( get_current_user_id(), 'tidy_admin_menu_hidden', $sanitized_hidden );
+			update_user_meta( get_current_user_id(), 'tidy_admin_menu_hidden_submenus', $sanitized_hidden_submenus );
 		} else {
 			update_option( 'tidy_admin_menu_order', $sanitized_order, false );
 			update_option( 'tidy_admin_menu_hidden', $sanitized_hidden, false );
+			update_option( 'tidy_admin_menu_hidden_submenus', $sanitized_hidden_submenus, false );
 		}
 
-		// Save hide_collapse_menu setting (global setting, not per-role/user).
-		$hide_collapse_menu = isset( $_POST['hide_collapse_menu'] ) && 'true' === $_POST['hide_collapse_menu'];
-		$settings           = get_option( 'tidy_admin_menu_settings', array() );
-		$settings['hide_collapse_menu'] = $hide_collapse_menu;
+		// Save extra options (global settings, not per-role/user).
+		$settings = get_option( 'tidy_admin_menu_settings', array() );
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verified in verify_request().
+		$settings['hide_collapse_menu'] = isset( $_POST['hide_collapse_menu'] ) && 'true' === $_POST['hide_collapse_menu'];
+		$settings['hide_theme_editor']    = isset( $_POST['hide_theme_editor'] ) && 'true' === $_POST['hide_theme_editor'];
+		$settings['hide_plugin_editor']   = isset( $_POST['hide_plugin_editor'] ) && 'true' === $_POST['hide_plugin_editor'];
+		$settings['hide_available_tools'] = isset( $_POST['hide_available_tools'] ) && 'true' === $_POST['hide_available_tools'];
+		$settings['hide_privacy']         = isset( $_POST['hide_privacy'] ) && 'true' === $_POST['hide_privacy'];
+		$settings['hide_customize']       = isset( $_POST['hide_customize'] ) && 'true' === $_POST['hide_customize'];
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
 		update_option( 'tidy_admin_menu_settings', $settings, true );
 
 		wp_send_json_success( array( 'message' => __( 'Settings saved.', 'tidy-admin-menu' ) ) );
@@ -181,6 +237,7 @@ class Ajax_Handler {
 		$this->verify_request();
 
 		// Get and sanitize hidden items.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified in verify_request(), sanitized per-item below.
 		$hidden = isset( $_POST['hidden'] ) ? wp_unslash( $_POST['hidden'] ) : array();
 
 		if ( ! is_array( $hidden ) ) {
@@ -208,6 +265,7 @@ class Ajax_Handler {
 	public function save_settings() {
 		$this->verify_request();
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified in verify_request().
 		$apply_to = isset( $_POST['apply_to'] ) ? sanitize_text_field( wp_unslash( $_POST['apply_to'] ) ) : 'all';
 
 		// Validate apply_to value.
@@ -216,12 +274,13 @@ class Ajax_Handler {
 		}
 
 		// Get hide_collapse_menu setting.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified in verify_request().
 		$hide_collapse_menu = isset( $_POST['hide_collapse_menu'] ) && 'true' === $_POST['hide_collapse_menu'];
 
-		$settings = array(
-			'apply_to'           => $apply_to,
-			'hide_collapse_menu' => $hide_collapse_menu,
-		);
+		// Merge with existing settings to preserve extra options.
+		$settings                      = get_option( 'tidy_admin_menu_settings', array() );
+		$settings['apply_to']          = $apply_to;
+		$settings['hide_collapse_menu'] = $hide_collapse_menu;
 
 		update_option( 'tidy_admin_menu_settings', $settings, true ); // Autoload settings.
 
@@ -239,6 +298,7 @@ class Ajax_Handler {
 		// Delete stored order and hidden items.
 		if ( 'role' === $storage_method ) {
 			// Get the role being reset.
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified in verify_request().
 			$role = isset( $_POST['role'] ) ? sanitize_text_field( wp_unslash( $_POST['role'] ) ) : '';
 
 			// Validate role exists.
@@ -252,9 +312,11 @@ class Ajax_Handler {
 		} elseif ( 'user' === $storage_method ) {
 			delete_user_meta( get_current_user_id(), 'tidy_admin_menu_order' );
 			delete_user_meta( get_current_user_id(), 'tidy_admin_menu_hidden' );
+			delete_user_meta( get_current_user_id(), 'tidy_admin_menu_hidden_submenus' );
 		} else {
 			delete_option( 'tidy_admin_menu_order' );
 			delete_option( 'tidy_admin_menu_hidden' );
+			delete_option( 'tidy_admin_menu_hidden_submenus' );
 		}
 
 		wp_send_json_success( array( 'message' => __( 'Menu reset to default.', 'tidy-admin-menu' ) ) );
@@ -270,26 +332,31 @@ class Ajax_Handler {
 		$apply_to = isset( $settings['apply_to'] ) ? $settings['apply_to'] : 'all';
 
 		// Get the role being exported (if in role mode).
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified in verify_request().
 		$export_role = isset( $_POST['role'] ) ? sanitize_text_field( wp_unslash( $_POST['role'] ) ) : '';
 
 		if ( 'role' === $apply_to && ! empty( $export_role ) ) {
 			// Export specific role config.
-			$role_config = get_option( 'tidy_admin_menu_role_' . $export_role, array() );
-			$order       = isset( $role_config['order'] ) ? $role_config['order'] : array();
-			$hidden      = isset( $role_config['hidden'] ) ? $role_config['hidden'] : array();
+			$role_config     = get_option( 'tidy_admin_menu_role_' . $export_role, array() );
+			$order           = isset( $role_config['order'] ) ? $role_config['order'] : array();
+			$hidden          = isset( $role_config['hidden'] ) ? $role_config['hidden'] : array();
+			$hidden_submenus = isset( $role_config['hidden_submenus'] ) ? $role_config['hidden_submenus'] : array();
 		} elseif ( 'user' === $apply_to ) {
-			$order  = get_user_meta( get_current_user_id(), 'tidy_admin_menu_order', true );
-			$hidden = get_user_meta( get_current_user_id(), 'tidy_admin_menu_hidden', true );
+			$order           = get_user_meta( get_current_user_id(), 'tidy_admin_menu_order', true );
+			$hidden          = get_user_meta( get_current_user_id(), 'tidy_admin_menu_hidden', true );
+			$hidden_submenus = get_user_meta( get_current_user_id(), 'tidy_admin_menu_hidden_submenus', true );
 		} else {
-			$order  = get_option( 'tidy_admin_menu_order', array() );
-			$hidden = get_option( 'tidy_admin_menu_hidden', array() );
+			$order           = get_option( 'tidy_admin_menu_order', array() );
+			$hidden          = get_option( 'tidy_admin_menu_hidden', array() );
+			$hidden_submenus = get_option( 'tidy_admin_menu_hidden_submenus', array() );
 		}
 
 		$config = array(
-			'version'  => TIDY_ADMIN_MENU_VERSION,
-			'settings' => $settings,
-			'order'    => is_array( $order ) ? $order : array(),
-			'hidden'   => is_array( $hidden ) ? $hidden : array(),
+			'version'         => TIDY_ADMIN_MENU_VERSION,
+			'settings'        => $settings,
+			'order'           => is_array( $order ) ? $order : array(),
+			'hidden'          => is_array( $hidden ) ? $hidden : array(),
+			'hidden_submenus' => is_array( $hidden_submenus ) ? $hidden_submenus : array(),
 		);
 
 		// Include role in export if applicable.
@@ -306,6 +373,7 @@ class Ajax_Handler {
 	public function import_config() {
 		$this->verify_request();
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified in verify_request(), JSON decoded and sanitized below.
 		$config = isset( $_POST['config'] ) ? wp_unslash( $_POST['config'] ) : '';
 
 		if ( empty( $config ) ) {
@@ -334,7 +402,25 @@ class Ajax_Handler {
 		$hidden = array_filter( $hidden );
 		$hidden = array_values( $hidden );
 
+		// Sanitize hidden submenus (optional - older exports may not have this).
+		$hidden_submenus = array();
+		if ( isset( $data['hidden_submenus'] ) && is_array( $data['hidden_submenus'] ) ) {
+			foreach ( $data['hidden_submenus'] as $parent_slug => $submenu_slugs ) {
+				$parent_slug = $this->sanitize_menu_slug( $parent_slug );
+				if ( empty( $parent_slug ) || ! is_array( $submenu_slugs ) ) {
+					continue;
+				}
+				$sanitized_slugs = array_map( array( $this, 'sanitize_menu_slug' ), $submenu_slugs );
+				$sanitized_slugs = array_filter( $sanitized_slugs );
+				$sanitized_slugs = array_values( $sanitized_slugs );
+				if ( ! empty( $sanitized_slugs ) ) {
+					$hidden_submenus[ $parent_slug ] = $sanitized_slugs;
+				}
+			}
+		}
+
 		// Get the role to import into (if in role mode).
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified in verify_request().
 		$import_role    = isset( $_POST['role'] ) ? sanitize_text_field( wp_unslash( $_POST['role'] ) ) : '';
 		$storage_method = $this->get_storage_method();
 
@@ -348,17 +434,20 @@ class Ajax_Handler {
 
 			// Save role-specific config.
 			$role_config = array(
-				'order'  => $order,
-				'hidden' => $hidden,
+				'order'           => $order,
+				'hidden'          => $hidden,
+				'hidden_submenus' => $hidden_submenus,
 			);
 			update_option( 'tidy_admin_menu_role_' . $import_role, $role_config, false );
 
 		} elseif ( 'user' === $storage_method ) {
 			update_user_meta( get_current_user_id(), 'tidy_admin_menu_order', $order );
 			update_user_meta( get_current_user_id(), 'tidy_admin_menu_hidden', $hidden );
+			update_user_meta( get_current_user_id(), 'tidy_admin_menu_hidden_submenus', $hidden_submenus );
 		} else {
 			update_option( 'tidy_admin_menu_order', $order, false );
 			update_option( 'tidy_admin_menu_hidden', $hidden, false );
+			update_option( 'tidy_admin_menu_hidden_submenus', $hidden_submenus, false );
 		}
 
 		// Import settings if provided (but only if not in role mode - role mode doesn't change global settings).

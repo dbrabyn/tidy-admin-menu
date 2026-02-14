@@ -37,6 +37,9 @@
 				button.click();
 			}
 		} );
+
+		// Fix submenu flyout positioning when Show All is active.
+		initSubmenuPositioning();
 	}
 
 	/**
@@ -73,6 +76,78 @@
 
 		// Update empty separator visibility.
 		updateEmptySeparators( isActive );
+	}
+
+	/**
+	 * Fix submenu flyout positioning when Show All mode is active.
+	 *
+	 * Because #adminmenuwrap has overflow-x: hidden in Show All mode,
+	 * flyout submenus get clipped. This repositions them with
+	 * position: fixed so they escape the overflow container.
+	 */
+	function initSubmenuPositioning() {
+		var menu = document.getElementById( 'adminmenu' );
+		var wrap = document.getElementById( 'adminmenuwrap' );
+
+		if ( ! menu || ! wrap ) {
+			return;
+		}
+
+		var activeItem = null;
+		var activeSubmenu = null;
+
+		function positionSubmenu() {
+			if ( ! activeItem || ! activeSubmenu ) {
+				return;
+			}
+			var rect = activeItem.getBoundingClientRect();
+			activeSubmenu.style.position = 'fixed';
+			activeSubmenu.style.top = rect.top + 'px';
+			activeSubmenu.style.left = rect.right + 'px';
+			activeSubmenu.style.zIndex = '10001';
+		}
+
+		function resetSubmenu( submenu ) {
+			submenu.style.position = '';
+			submenu.style.top = '';
+			submenu.style.left = '';
+			submenu.style.zIndex = '';
+		}
+
+		var items = menu.querySelectorAll( ':scope > li' );
+
+		items.forEach( function( item ) {
+			item.addEventListener( 'mouseenter', function() {
+				if ( ! document.body.classList.contains( 'tidy-show-all-active' ) ) {
+					return;
+				}
+				// Skip items with submenu already visible inline.
+				if ( item.classList.contains( 'wp-has-current-submenu' ) || item.classList.contains( 'wp-menu-open' ) ) {
+					return;
+				}
+				var submenu = item.querySelector( '.wp-submenu' );
+				if ( ! submenu ) {
+					return;
+				}
+				activeItem = item;
+				activeSubmenu = submenu;
+				positionSubmenu();
+			} );
+
+			item.addEventListener( 'mouseleave', function() {
+				var submenu = item.querySelector( '.wp-submenu' );
+				if ( submenu ) {
+					resetSubmenu( submenu );
+				}
+				if ( activeItem === item ) {
+					activeItem = null;
+					activeSubmenu = null;
+				}
+			} );
+		} );
+
+		// Update position when the menu is scrolled.
+		wrap.addEventListener( 'scroll', positionSubmenu );
 	}
 
 	/**

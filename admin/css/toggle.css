@@ -9,15 +9,18 @@
  */
 
 /* Show All toggle wrapper - flows naturally after last menu item */
-.tidy-show-all-wrapper {
+/* High specificity to avoid conflicts with plugin flyout menus (e.g., MailPoet) */
+#adminmenu .tidy-show-all-wrapper {
 	background: #1d2327;
 	border-top: 1px solid #3c434a;
-	padding: 0 !important;
-	margin: 0 !important;
+	padding: 0;
+	margin: 0;
+	position: relative;
+	z-index: 1;
 }
 
 /* Show All button */
-.tidy-show-all-btn {
+#adminmenu .tidy-show-all-wrapper .tidy-show-all-btn {
 	display: flex;
 	align-items: center;
 	justify-content: start;
@@ -32,51 +35,52 @@
 	transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.tidy-show-all-btn:hover {
+#adminmenu .tidy-show-all-wrapper .tidy-show-all-btn:hover {
 	background: #2c3338;
 	color: #fff;
 }
 
-.tidy-show-all-btn:focus {
+#adminmenu .tidy-show-all-wrapper .tidy-show-all-btn:focus {
 	outline: 2px solid #2271b1;
 	outline-offset: -2px;
 }
 
-.tidy-show-all-btn .tidy-toggle-icon {
+#adminmenu .tidy-show-all-wrapper .tidy-show-all-btn .tidy-toggle-icon {
 	font-size: 18px;
 	font-weight: bold;
 	line-height: 1;
 }
 
 /* Active state */
-.tidy-show-all-btn[aria-pressed="true"] {
+#adminmenu .tidy-show-all-wrapper .tidy-show-all-btn[aria-pressed="true"] {
 	background: #2271b1;
 	color: #fff;
 }
 
-.tidy-show-all-btn[aria-pressed="true"]:hover {
+#adminmenu .tidy-show-all-wrapper .tidy-show-all-btn[aria-pressed="true"]:hover {
 	background: #135e96;
 }
 
 /* Toggle text - hide on collapsed menu */
-.folded .tidy-toggle-text {
+.folded #adminmenu .tidy-show-all-wrapper .tidy-toggle-text {
 	display: none;
 }
 
-.folded .tidy-show-all-btn {
+.folded #adminmenu .tidy-show-all-wrapper .tidy-show-all-btn {
 	justify-content: center;
 	padding: 12px 6px;
 }
 
 /* Hidden menu items - default state (hidden) */
-#adminmenu .tidy-hidden-item {
-	display: none;
+/* Using !important as some plugins (e.g., MailPoet) inject styles that override normal specificity */
+#adminmenu li.tidy-hidden-item {
+	display: none !important;
 }
 
 /* Exception: show current/active hidden item (when visiting that page) */
-#adminmenu .tidy-hidden-item.current,
-#adminmenu .tidy-hidden-item.wp-has-current-submenu {
-	display: block;
+#adminmenu li.tidy-hidden-item.current,
+#adminmenu li.tidy-hidden-item.wp-has-current-submenu {
+	display: block !important;
 }
 
 /* Empty separators - hide when no visible items between them */
@@ -85,8 +89,8 @@
 }
 
 /* Hidden menu items - visible when Show All is active */
-body.tidy-show-all-active #adminmenu .tidy-hidden-item {
-	display: block;
+body.tidy-show-all-active #adminmenu li.tidy-hidden-item {
+	display: block !important;
 	opacity: 0.85;
 }
 
@@ -96,6 +100,7 @@ body.tidy-show-all-active #adminmenuwrap {
 	top: 32px; /* Below admin bar */
 	bottom: 46px; /* Above collapse button */
 	left: 0;
+	overflow-x: hidden;
 	overflow-y: auto;
 }
 
@@ -116,9 +121,17 @@ body.tidy-show-all-active #adminmenu .tidy-hidden-item:hover {
 	opacity: 1;
 }
 
+/* Remove WordPress default blue box-shadow on hidden items */
+body.tidy-show-all-active #adminmenu .tidy-hidden-item > a:focus,
+body.tidy-show-all-active #adminmenu .tidy-hidden-item > a:hover,
+body.tidy-show-all-active #adminmenu .tidy-hidden-item.opensub > a,
+body.tidy-show-all-active #adminmenu .tidy-hidden-item:hover > a {
+	box-shadow: none !important;
+}
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-	.tidy-show-all-btn {
+	#adminmenu .tidy-show-all-wrapper .tidy-show-all-btn {
 		transition: none;
 	}
 }

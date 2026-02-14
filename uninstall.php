@@ -23,6 +23,7 @@ function tidy_admin_menu_uninstall() {
 	delete_option( 'tidy_admin_menu_settings' );
 	delete_option( 'tidy_admin_menu_order' );
 	delete_option( 'tidy_admin_menu_hidden' );
+	delete_option( 'tidy_admin_menu_hidden_submenus' );
 
 	// Delete role-specific options.
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -43,6 +44,12 @@ function tidy_admin_menu_uninstall() {
 		array( 'meta_key' => 'tidy_admin_menu_hidden' )
 	);
 
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+	$wpdb->delete(
+		$wpdb->usermeta,
+		array( 'meta_key' => 'tidy_admin_menu_hidden_submenus' )
+	);
+
 	// Clean up multisite if applicable.
 	if ( is_multisite() ) {
 		$sites = get_sites( array( 'fields' => 'ids' ) );
@@ -53,6 +60,7 @@ function tidy_admin_menu_uninstall() {
 			delete_option( 'tidy_admin_menu_settings' );
 			delete_option( 'tidy_admin_menu_order' );
 			delete_option( 'tidy_admin_menu_hidden' );
+			delete_option( 'tidy_admin_menu_hidden_submenus' );
 
 			// Delete role-specific options for this site.
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching

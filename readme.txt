@@ -2,7 +2,7 @@
 Contributors: dbrabyn
 Tags: admin menu, menu order, hide menu, admin customization, tidy admin menu
 Requires at least: 5.8
-Tested up to: 6.7
+Tested up to: 6.9
 Requires PHP: 7.4
 Stable tag: 1.0.20
 License: GPLv2 or later

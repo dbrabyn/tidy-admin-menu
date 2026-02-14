@@ -129,13 +129,14 @@
 				self.markUnsaved();
 			} );
 
-			// Show All checkbox.
+			// Show All checkbox (top-level items only).
 			$( '#tidy-show-all' ).on( 'change', function() {
 				var showAll = this.checked;
-				$( '.tidy-visibility-toggle' ).each( function() {
-					if ( this.checked !== showAll ) {
-						this.checked = showAll;
-						$( this ).closest( '.tidy-menu-item' ).toggleClass( 'tidy-is-hidden', ! showAll );
+				$( '#tidy-menu-list > .tidy-menu-item' ).each( function() {
+					var $checkbox = $( this ).find( '> .tidy-item-content .tidy-visibility-toggle' );
+					if ( $checkbox.length && $checkbox.prop( 'checked' ) !== showAll ) {
+						$checkbox.prop( 'checked', showAll );
+						$( this ).toggleClass( 'tidy-is-hidden', ! showAll );
 					}
 				} );
 				self.markUnsaved();
@@ -159,8 +160,68 @@
 				self.saveSettings();
 			} );
 
-			// Hide collapse menu checkbox change.
-			$( '#tidy-hide-collapse-menu' ).on( 'change', function() {
+			// Extra options checkbox changes (with hardcoded sync).
+			$( '.tidy-extra-options input[type="checkbox"]' ).on( 'change', function() {
+				self.syncHardcodedToSubmenu( $( this ) );
+				self.markUnsaved();
+			} );
+
+			// Show Submenu Items toggle.
+			$( '#tidy-show-submenus' ).on( 'change', function() {
+				var expand = this.checked;
+				$( '.tidy-has-submenu' ).each( function() {
+					var $btn = $( this ).find( '> .tidy-submenu-toggle' );
+					if ( expand ) {
+						$( this ).addClass( 'tidy-parent-expanded' );
+						$btn.attr( 'aria-expanded', 'true' );
+					} else {
+						$( this ).removeClass( 'tidy-parent-expanded' );
+						$btn.attr( 'aria-expanded', 'false' );
+					}
+				} );
+			} );
+
+			// Submenu expand/collapse toggle.
+			$( document ).on( 'click', '.tidy-submenu-toggle', function( e ) {
+				e.preventDefault();
+				var $parent = $( this ).closest( '.tidy-menu-item' );
+				var expanded = $parent.hasClass( 'tidy-parent-expanded' );
+				$parent.toggleClass( 'tidy-parent-expanded', ! expanded );
+				$( this ).attr( 'aria-expanded', ! expanded ? 'true' : 'false' );
+			} );
+
+			// Submenu visibility toggle.
+			$( document ).on( 'change', '.tidy-submenu-visibility', function() {
+				var $subItem = $( this ).closest( '.tidy-submenu-item' );
+				if ( this.checked ) {
+					$subItem.removeClass( 'tidy-is-hidden' );
+				} else {
+					$subItem.addClass( 'tidy-is-hidden' );
+				}
+				var $parent = $( this ).closest( '.tidy-menu-item' );
+				self.updateSubmenuBadge( $parent );
+				self.updateEmptyParentState( $parent );
+				self.updateParentBulkToggle( $parent );
+				self.syncSubmenuToHardcoded( $subItem );
+				self.markUnsaved();
+			} );
+
+			// Per-parent bulk toggle.
+			$( document ).on( 'change', '.tidy-parent-bulk-toggle', function() {
+				var showAll = this.checked;
+				var $parent = $( this ).closest( '.tidy-menu-item' );
+				$parent.find( '.tidy-submenu-visibility' ).each( function() {
+					if ( this.checked !== showAll ) {
+						this.checked = showAll;
+						$( this ).closest( '.tidy-submenu-item' ).toggleClass( 'tidy-is-hidden', ! showAll );
+						self.syncSubmenuToHardcoded( $( this ).closest( '.tidy-submenu-item' ) );
+					}
+				} );
+				$parent.find( '.tidy-bulk-toggle-label' ).text(
+					showAll ? tidyAdminMenu.strings.hideAllSubs : tidyAdminMenu.strings.showAllSubs
+				);
+				self.updateSubmenuBadge( $parent );
+				self.updateEmptyParentState( $parent );
 				self.markUnsaved();
 			} );
 
@@ -290,7 +351,7 @@
 		 * Update the Show All checkbox state based on individual visibility toggles.
 		 */
 		updateShowAllCheckbox: function() {
-			var $checkboxes = $( '.tidy-visibility-toggle' );
+			var $checkboxes = $( '#tidy-menu-list > .tidy-menu-item > .tidy-item-content .tidy-visibility-toggle' );
 			var allChecked = $checkboxes.length > 0 && $checkboxes.filter( ':checked' ).length === $checkboxes.length;
 			$( '#tidy-show-all' ).prop( 'checked', allChecked );
 		},
@@ -316,7 +377,7 @@
 			var order = [];
 			var hidden = [];
 
-			$( '#tidy-menu-list .tidy-menu-item' ).each( function() {
+			$( '#tidy-menu-list > .tidy-menu-item' ).each( function() {
 				var slug = $( this ).data( 'slug' );
 				order.push( slug );
 				if ( $( this ).hasClass( 'tidy-is-hidden' ) ) {
@@ -324,17 +385,34 @@
 				}
 			} );
 
+			// Collect hidden submenu items.
+			var hiddenSubmenus = {};
+			$( '.tidy-submenu-item.tidy-is-hidden' ).each( function() {
+				var parentSlug = $( this ).data( 'parent-slug' );
+				var slug = $( this ).data( 'slug' );
+				if ( parentSlug && slug ) {
+					if ( ! hiddenSubmenus[ parentSlug ] ) {
+						hiddenSubmenus[ parentSlug ] = [];
+					}
+					hiddenSubmenus[ parentSlug ].push( slug );
+				}
+			} );
+
 			this.updateStatus( 'saving' );
 			$( '#tidy-save-settings' ).prop( 'disabled', true );
-
-			var hideCollapseMenu = $( '#tidy-hide-collapse-menu' ).prop( 'checked' );
 
 			var postData = {
 				action: 'tidy_save_all_settings',
 				nonce: tidyAdminMenu.nonce,
 				order: order,
 				hidden: hidden,
-				hide_collapse_menu: hideCollapseMenu ? 'true' : 'false'
+				hidden_submenus: JSON.stringify( hiddenSubmenus ),
+				hide_collapse_menu: $( '#tidy-hide-collapse-menu' ).prop( 'checked' ) ? 'true' : 'false',
+				hide_theme_editor: $( '#tidy-hide-theme-editor' ).prop( 'checked' ) ? 'true' : 'false',
+				hide_plugin_editor: $( '#tidy-hide-plugin-editor' ).prop( 'checked' ) ? 'true' : 'false',
+				hide_available_tools: $( '#tidy-hide-available-tools' ).prop( 'checked' ) ? 'true' : 'false',
+				hide_privacy: $( '#tidy-hide-privacy' ).prop( 'checked' ) ? 'true' : 'false',
+				hide_customize: $( '#tidy-hide-customize' ).prop( 'checked' ) ? 'true' : 'false'
 			};
 
 			// Include role if in role mode.
@@ -475,11 +553,21 @@
 					var url = URL.createObjectURL( blob );
 					var a = document.createElement( 'a' );
 					a.href = url;
-					// Include role in filename if applicable.
-					var filename = 'tidy-admin-menu-config';
+					// Build descriptive filename with site name and timestamp.
+					var date = new Date();
+					var dateStr = date.getFullYear() + '-' +
+						String( date.getMonth() + 1 ).padStart( 2, '0' ) + '-' +
+						String( date.getDate() ).padStart( 2, '0' ) + '-' +
+						String( date.getHours() ).padStart( 2, '0' ) +
+						String( date.getMinutes() ).padStart( 2, '0' );
+					var filename = 'tidy-config';
+					if ( tidyAdminMenu.siteName ) {
+						filename += '-' + tidyAdminMenu.siteName;
+					}
 					if ( self.applyTo === 'role' && self.activeRole ) {
 						filename += '-' + self.activeRole;
 					}
+					filename += '-' + dateStr;
 					a.download = filename + '.json';
 					document.body.appendChild( a );
 					a.click();
@@ -572,6 +660,116 @@
 			.fail( function() {
 				alert( tidyAdminMenu.strings.resetError );
 			} );
+		},
+
+		/**
+		 * Hardcoded checkbox to submenu item mappings.
+		 */
+		hardcodedMappings: {
+			'tidy-hide-theme-editor': { parent: 'themes.php', submenu: 'theme-editor.php' },
+			'tidy-hide-plugin-editor': { parent: 'plugins.php', submenu: 'plugin-editor.php' },
+			'tidy-hide-available-tools': { parent: 'tools.php', submenu: 'tools.php' },
+			'tidy-hide-privacy': { parent: 'options-general.php', submenu: 'options-privacy.php' },
+			'tidy-hide-customize': { parent: 'themes.php', submenu: 'customize.php' }
+		},
+
+		/**
+		 * Sync a hardcoded Extra Options checkbox to its dynamic submenu item.
+		 *
+		 * @param {jQuery} $checkbox The hardcoded checkbox that changed.
+		 */
+		syncHardcodedToSubmenu: function( $checkbox ) {
+			var id = $checkbox.attr( 'id' );
+			var mapping = this.hardcodedMappings[ id ];
+			if ( ! mapping ) {
+				return;
+			}
+			var isHidden = $checkbox.prop( 'checked' );
+			var $subItem = $( '.tidy-submenu-item[data-parent-slug="' + mapping.parent + '"][data-slug="' + mapping.submenu + '"]' );
+			if ( $subItem.length ) {
+				$subItem.find( '.tidy-submenu-visibility' ).prop( 'checked', ! isHidden );
+				$subItem.toggleClass( 'tidy-is-hidden', isHidden );
+				var $parent = $subItem.closest( '.tidy-menu-item' );
+				this.updateSubmenuBadge( $parent );
+				this.updateEmptyParentState( $parent );
+				this.updateParentBulkToggle( $parent );
+			}
+		},
+
+		/**
+		 * Sync a dynamic submenu item change to its hardcoded Extra Options checkbox.
+		 *
+		 * @param {jQuery} $subItem The submenu item that changed.
+		 */
+		syncSubmenuToHardcoded: function( $subItem ) {
+			var parentSlug = $subItem.data( 'parent-slug' );
+			var slug = $subItem.data( 'slug' );
+			var isHidden = $subItem.hasClass( 'tidy-is-hidden' );
+
+			var self = this;
+			$.each( this.hardcodedMappings, function( checkboxId, mapping ) {
+				if ( mapping.parent === parentSlug && mapping.submenu === slug ) {
+					$( '#' + checkboxId ).prop( 'checked', isHidden );
+					return false; // Break.
+				}
+			} );
+		},
+
+		/**
+		 * Update the submenu badge count for a parent item.
+		 *
+		 * @param {jQuery} $parent The parent menu item.
+		 */
+		updateSubmenuBadge: function( $parent ) {
+			var $badge = $parent.find( '> .tidy-submenu-badge' );
+			if ( ! $badge.length ) {
+				return;
+			}
+			var hiddenCount = $parent.find( '.tidy-submenu-item.tidy-is-hidden' ).length;
+			if ( hiddenCount > 0 ) {
+				$badge.text( tidyAdminMenu.strings.nHidden.replace( '%d', hiddenCount ) ).removeClass( 'tidy-badge-hidden' );
+			} else {
+				$badge.addClass( 'tidy-badge-hidden' );
+			}
+		},
+
+		/**
+		 * Update the empty parent indicator when all submenus are hidden.
+		 *
+		 * @param {jQuery} $parent The parent menu item.
+		 */
+		updateEmptyParentState: function( $parent ) {
+			var totalSubs = $parent.find( '.tidy-submenu-item' ).length;
+			var hiddenSubs = $parent.find( '.tidy-submenu-item.tidy-is-hidden' ).length;
+			var allHidden = totalSubs > 0 && hiddenSubs === totalSubs;
+			var $checkbox = $parent.find( '> .tidy-item-content .tidy-visibility-toggle' );
+
+			if ( allHidden && $checkbox.prop( 'checked' ) ) {
+				$checkbox.prop( 'checked', false );
+				$parent.addClass( 'tidy-is-hidden' );
+				this.updateShowAllCheckbox();
+			} else if ( ! allHidden && ! $checkbox.prop( 'checked' ) && $parent.hasClass( 'tidy-all-subs-hidden' ) ) {
+				$checkbox.prop( 'checked', true );
+				$parent.removeClass( 'tidy-is-hidden' );
+				this.updateShowAllCheckbox();
+			}
+
+			$parent.toggleClass( 'tidy-all-subs-hidden', allHidden );
+		},
+
+		/**
+		 * Update the per-parent bulk toggle checkbox state.
+		 *
+		 * @param {jQuery} $parent The parent menu item.
+		 */
+		updateParentBulkToggle: function( $parent ) {
+			var $subs = $parent.find( '.tidy-submenu-visibility' );
+			var allChecked = $subs.length > 0 && $subs.filter( ':checked' ).length === $subs.length;
+			var $bulk = $parent.find( '.tidy-parent-bulk-toggle' );
+			$bulk.prop( 'checked', allChecked );
+			$parent.find( '.tidy-bulk-toggle-label' ).text(
+				allChecked ? tidyAdminMenu.strings.hideAllSubs : tidyAdminMenu.strings.showAllSubs
+			);
 		},
 
 		/**

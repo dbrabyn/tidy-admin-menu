@@ -25,8 +25,8 @@ define( 'TIDY_ADMIN_MENU_URL', plugin_dir_url( __FILE__ ) );
 define( 'TIDY_ADMIN_MENU_BASENAME', plugin_basename( __FILE__ ) );
 
 // Get version from plugin header (single source of truth).
-$tidy_plugin_data = get_file_data( __FILE__, array( 'Version' => 'Version' ) );
-define( 'TIDY_ADMIN_MENU_VERSION', $tidy_plugin_data['Version'] );
+$tidy_admin_menu_plugin_data = get_file_data( __FILE__, array( 'Version' => 'Version' ) );
+define( 'TIDY_ADMIN_MENU_VERSION', $tidy_admin_menu_plugin_data['Version'] );
 
 // Plugin Update Checker.
 require_once TIDY_ADMIN_MENU_PATH . 'plugin-update-checker/plugin-update-checker.php';

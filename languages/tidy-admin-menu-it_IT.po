@@ -1,18 +1,21 @@
+# Italian translation for Tidy Admin Menu
 # Copyright (C) 2026 David Brabyn
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
 "Project-Id-Version: Tidy Admin Menu 1.0.20\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/tidy-admin-menu\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Last-Translator: Claude AI\n"
+"Language-Team: Italian\n"
+"Language: it_IT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2026-02-14T16:45:25+00:00\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2026-02-14T17:00:00+00:00\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: tidy-admin-menu\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. Plugin Name of the plugin
 #: tidy-admin-menu.php
@@ -20,348 +23,348 @@ msgstr ""
 #: includes/class-admin-settings.php:41
 #: includes/class-admin-settings.php:258
 msgid "Tidy Admin Menu"
-msgstr ""
+msgstr "Tidy Admin Menu"
 
 #. Plugin URI of the plugin
 #: tidy-admin-menu.php
 msgid "https://github.com/dbrabyn/tidy-admin-menu"
-msgstr ""
+msgstr "https://github.com/dbrabyn/tidy-admin-menu"
 
 #. Description of the plugin
 #: tidy-admin-menu.php
 msgid "Declutter your WordPress dashboard by sorting and hiding admin menu items with a simple Show All toggle."
-msgstr ""
+msgstr "Riordina la tua bacheca WordPress ordinando e nascondendo le voci del menu di amministrazione con un semplice pulsante Mostra tutto."
 
 #. Author of the plugin
 #: tidy-admin-menu.php
 msgid "David Brabyn"
-msgstr ""
+msgstr "David Brabyn"
 
 #. Author URI of the plugin
 #: tidy-admin-menu.php
 msgid "https://9wdigital.com"
-msgstr ""
+msgstr "https://9wdigital.com"
 
 #: includes/class-admin-settings.php:122
 msgid "Unsaved changes"
-msgstr ""
+msgstr "Modifiche non salvate"
 
 #: includes/class-admin-settings.php:123
 msgid "Saving..."
-msgstr ""
+msgstr "Salvataggio in corso…"
 
 #: includes/class-admin-settings.php:124
 msgid "Saved"
-msgstr ""
+msgstr "Salvato"
 
 #: includes/class-admin-settings.php:125
 msgid "Error saving. Please try again."
-msgstr ""
+msgstr "Errore durante il salvataggio. Riprova."
 
 #: includes/class-admin-settings.php:126
 #: includes/class-admin-settings.php:354
 msgid "Separator"
-msgstr ""
+msgstr "Separatore"
 
 #: includes/class-admin-settings.php:127
 #: includes/class-admin-settings.php:503
 msgid "No file chosen"
-msgstr ""
+msgstr "Nessun file selezionato"
 
 #: includes/class-admin-settings.php:128
 msgid "Are you sure you want to reset the menu to default? This will restore the original WordPress menu order and show all hidden items."
-msgstr ""
+msgstr "Sei sicuro di voler ripristinare il menu ai valori predefiniti? Questo ripristinerà l'ordine originale del menu di WordPress e mostrerà tutte le voci nascoste."
 
 #: includes/class-admin-settings.php:129
 #: includes/class-ajax-handler.php:312
 msgid "Menu reset to default."
-msgstr ""
+msgstr "Menu ripristinato ai valori predefiniti."
 
 #: includes/class-admin-settings.php:130
 msgid "Error resetting menu. Please try again."
-msgstr ""
+msgstr "Errore durante il ripristino del menu. Riprova."
 
 #: includes/class-admin-settings.php:131
 msgid "You have unsaved changes. Are you sure you want to switch roles? Your changes will be lost."
-msgstr ""
+msgstr "Hai modifiche non salvate. Sei sicuro di voler cambiare ruolo? Le tue modifiche andranno perse."
 
 #: includes/class-admin-settings.php:132
 msgid "Please select a file to import."
-msgstr ""
+msgstr "Seleziona un file da importare."
 
 #: includes/class-admin-settings.php:133
 #: includes/class-admin-settings.php:357
 msgid "Remove separator"
-msgstr ""
+msgstr "Rimuovi separatore"
 
 #. translators: %d: number of hidden submenu items
 #: includes/class-admin-settings.php:134
 #: includes/class-admin-settings.php:387
 #, php-format
 msgid "%d hidden"
-msgstr ""
+msgstr "%d nascosti"
 
 #: includes/class-admin-settings.php:135
 #: includes/class-admin-settings.php:406
 msgid "Hide all"
-msgstr ""
+msgstr "Nascondi tutto"
 
 #: includes/class-admin-settings.php:136
 #: includes/class-admin-settings.php:406
 msgid "Show all"
-msgstr ""
+msgstr "Mostra tutto"
 
 #: includes/class-admin-settings.php:192
 msgid "You do not have permission to access this page."
-msgstr ""
+msgstr "Non hai i permessi per accedere a questa pagina."
 
 #: includes/class-admin-settings.php:259
 msgid "Drag and drop menu items to reorder. Uncheck items to hide them from the admin menu."
-msgstr ""
+msgstr "Trascina e rilascia le voci del menu per riordinarle. Deseleziona le voci per nasconderle dal menu di amministrazione."
 
 #. translators: %s: comma-separated list of menu item names
 #: includes/class-admin-settings.php:267
 #, php-format
 msgid "The following menu items cannot be reordered because they are missing a menu slug: %s. The plugin or theme registering these items should specify a menu_slug parameter."
-msgstr ""
+msgstr "Le seguenti voci del menu non possono essere riordinate perché mancano di uno slug di menu: %s. Il plugin o il tema che registra queste voci dovrebbe specificare un parametro menu_slug."
 
 #: includes/class-admin-settings.php:278
 msgid "Role configuration tabs"
-msgstr ""
+msgstr "Schede di configurazione per ruolo"
 
 #: includes/class-admin-settings.php:294
 msgid "No users with this role"
-msgstr ""
+msgstr "Nessun utente con questo ruolo"
 
 #: includes/class-admin-settings.php:311
 msgid "Show All Menu Items"
-msgstr ""
+msgstr "Mostra tutte le voci del menu"
 
 #: includes/class-admin-settings.php:315
 msgid "Show Submenu Items"
-msgstr ""
+msgstr "Mostra voci del sottomenu"
 
 #: includes/class-admin-settings.php:319
 msgid "Add Separator"
-msgstr ""
+msgstr "Aggiungi separatore"
 
 #: includes/class-admin-settings.php:323
 msgid "Admin menu items"
-msgstr ""
+msgstr "Voci del menu di amministrazione"
 
 #. translators: %s: Menu item title
 #: includes/class-admin-settings.php:367
 #, php-format
 msgid "Show %s in menu"
-msgstr ""
+msgstr "Mostra %s nel menu"
 
 #. translators: %s: Menu item title
 #: includes/class-admin-settings.php:395
 #, php-format
 msgid "Toggle submenus for %s"
-msgstr ""
+msgstr "Mostra/nascondi sottomenu di %s"
 
 #. translators: %s: Submenu item title
 #: includes/class-admin-settings.php:421
 #, php-format
 msgid "Show %s in submenu"
-msgstr ""
+msgstr "Mostra %s nel sottomenu"
 
 #: includes/class-admin-settings.php:436
 msgid "Tip: Use keyboard arrows with Alt key to reorder items."
-msgstr ""
+msgstr "Suggerimento: usa i tasti freccia con il tasto Alt per riordinare le voci."
 
 #: includes/class-admin-settings.php:442
 msgid "Hide \"Collapse menu\" toggle"
-msgstr ""
+msgstr "Nascondi il pulsante «Comprimi menu»"
 
 #: includes/class-admin-settings.php:445
 msgid "Hide submenu items"
-msgstr ""
+msgstr "Nascondi voci del sottomenu"
 
 #: includes/class-admin-settings.php:450
 msgid "Appearance → Theme File Editor"
-msgstr ""
+msgstr "Aspetto → Editor file del tema"
 
 #: includes/class-admin-settings.php:452
 msgid "Hides direct theme code editing — a common security recommendation."
-msgstr ""
+msgstr "Nasconde la modifica diretta del codice del tema — una raccomandazione di sicurezza comune."
 
 #: includes/class-admin-settings.php:458
 msgid "Plugins → Plugin File Editor"
-msgstr ""
+msgstr "Plugin → Editor file dei plugin"
 
 #: includes/class-admin-settings.php:460
 msgid "Hides direct plugin code editing — a common security recommendation."
-msgstr ""
+msgstr "Nasconde la modifica diretta del codice dei plugin — una raccomandazione di sicurezza comune."
 
 #: includes/class-admin-settings.php:466
 msgid "Tools → Available Tools"
-msgstr ""
+msgstr "Strumenti → Strumenti disponibili"
 
 #: includes/class-admin-settings.php:468
 msgid "Removes the mostly empty Available Tools page — rarely useful in modern WordPress."
-msgstr ""
+msgstr "Rimuove la pagina Strumenti disponibili, quasi vuota — raramente utile nel WordPress moderno."
 
 #: includes/class-admin-settings.php:474
 msgid "Settings → Privacy"
-msgstr ""
+msgstr "Impostazioni → Privacy"
 
 #: includes/class-admin-settings.php:476
 msgid "Hides the Privacy settings page — useful once your Privacy Policy page is already set."
-msgstr ""
+msgstr "Nasconde la pagina delle impostazioni Privacy — utile quando la pagina della Privacy Policy è già configurata."
 
 #: includes/class-admin-settings.php:482
 msgid "Appearance → Customize"
-msgstr ""
+msgstr "Aspetto → Personalizza"
 
 #: includes/class-admin-settings.php:484
 msgid "Hides the Customizer — useful for block themes that don't use it."
-msgstr ""
+msgstr "Nasconde il Personalizzatore — utile per i temi a blocchi che non lo utilizzano."
 
 #: includes/class-admin-settings.php:490
 #: tidy-admin-menu.php:113
 msgid "Settings"
-msgstr ""
+msgstr "Impostazioni"
 
 #: includes/class-admin-settings.php:492
 msgid "Export / Import"
-msgstr ""
+msgstr "Esporta / Importa"
 
 #: includes/class-admin-settings.php:495
 msgid "Export Configuration"
-msgstr ""
+msgstr "Esporta configurazione"
 
 #: includes/class-admin-settings.php:501
 msgid "Choose File"
-msgstr ""
+msgstr "Scegli file"
 
 #: includes/class-admin-settings.php:505
 msgid "Import"
-msgstr ""
+msgstr "Importa"
 
 #: includes/class-admin-settings.php:512
 msgid "Apply settings to:"
-msgstr ""
+msgstr "Applica impostazioni a:"
 
 #: includes/class-admin-settings.php:515
 msgid "All users"
-msgstr ""
+msgstr "Tutti gli utenti"
 
 #: includes/class-admin-settings.php:519
 msgid "By role"
-msgstr ""
+msgstr "Per ruolo"
 
 #: includes/class-admin-settings.php:523
 msgid "Current user only"
-msgstr ""
+msgstr "Solo utente corrente"
 
 #: includes/class-admin-settings.php:531
 msgid "Save Settings"
-msgstr ""
+msgstr "Salva impostazioni"
 
 #: includes/class-admin-settings.php:540
 msgid "Reset to Default"
-msgstr ""
+msgstr "Ripristina valori predefiniti"
 
 #: includes/class-admin-settings.php:542
 msgid "Restore the original WordPress menu order and show all hidden items."
-msgstr ""
+msgstr "Ripristina l'ordine originale del menu di WordPress e mostra tutte le voci nascoste."
 
 #: includes/class-ajax-handler.php:41
 msgid "Security check failed."
-msgstr ""
+msgstr "Verifica di sicurezza fallita."
 
 #: includes/class-ajax-handler.php:46
 msgid "You do not have permission to perform this action."
-msgstr ""
+msgstr "Non hai i permessi per eseguire questa azione."
 
 #: includes/class-ajax-handler.php:130
 #: includes/class-ajax-handler.php:158
 #: includes/class-ajax-handler.php:170
 #: includes/class-ajax-handler.php:237
 msgid "Invalid data format."
-msgstr ""
+msgstr "Formato dati non valido."
 
 #: includes/class-ajax-handler.php:145
 msgid "Menu order saved."
-msgstr ""
+msgstr "Ordine del menu salvato."
 
 #: includes/class-ajax-handler.php:191
 #: includes/class-ajax-handler.php:297
 #: includes/class-ajax-handler.php:419
 msgid "Invalid role specified."
-msgstr ""
+msgstr "Ruolo specificato non valido."
 
 #: includes/class-ajax-handler.php:224
 #: includes/class-ajax-handler.php:278
 msgid "Settings saved."
-msgstr ""
+msgstr "Impostazioni salvate."
 
 #: includes/class-ajax-handler.php:252
 msgid "Hidden items saved."
-msgstr ""
+msgstr "Voci nascoste salvate."
 
 #: includes/class-ajax-handler.php:368
 msgid "No configuration data provided."
-msgstr ""
+msgstr "Nessun dato di configurazione fornito."
 
 #: includes/class-ajax-handler.php:375
 msgid "Invalid JSON format."
-msgstr ""
+msgstr "Formato JSON non valido."
 
 #: includes/class-ajax-handler.php:380
 msgid "Invalid configuration format."
-msgstr ""
+msgstr "Formato di configurazione non valido."
 
 #: includes/class-ajax-handler.php:453
 msgid "Configuration imported successfully."
-msgstr ""
+msgstr "Configurazione importata con successo."
 
 #: includes/class-menu-manager.php:468
 msgid "Show hidden menu items"
-msgstr ""
+msgstr "Mostra le voci di menu nascoste"
 
 #: includes/class-menu-manager.php:469
 msgid "More menu"
-msgstr ""
+msgstr "Più menu"
 
 #: includes/class-menu-manager.php:470
 msgid "Less menu"
-msgstr ""
+msgstr "Meno menu"
 
 #: includes/class-menu-manager.php:892
 msgid "Administrator"
-msgstr ""
+msgstr "Amministratore"
 
 #: includes/class-menu-manager.php:893
 msgid "Editor"
-msgstr ""
+msgstr "Editore"
 
 #: includes/class-menu-manager.php:894
 msgid "Author"
-msgstr ""
+msgstr "Autore"
 
 #: includes/class-menu-manager.php:895
 msgid "Contributor"
-msgstr ""
+msgstr "Collaboratore"
 
 #: includes/class-menu-manager.php:896
 msgid "Subscriber"
-msgstr ""
+msgstr "Sottoscrittore"
 
 #: includes/class-menu-manager.php:902
 msgid "Super Admin"
-msgstr ""
+msgstr "Super Admin"
 
 #: tidy-admin-menu.php:159
 msgid "Tidy Admin Menu:"
-msgstr ""
+msgstr "Tidy Admin Menu:"
 
 #. translators: %s: list of conflicting plugin names
 #: tidy-admin-menu.php:163
 #, php-format
 msgid "The following plugin may conflict with admin menu ordering: %s. Consider deactivating it for best results."
 msgid_plural "The following plugins may conflict with admin menu ordering: %s. Consider deactivating them for best results."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Il seguente plugin potrebbe entrare in conflitto con l'ordinamento del menu di amministrazione: %s. Considera di disattivarlo per ottenere risultati migliori."
+msgstr[1] "I seguenti plugin potrebbero entrare in conflitto con l'ordinamento del menu di amministrazione: %s. Considera di disattivarli per ottenere risultati migliori."

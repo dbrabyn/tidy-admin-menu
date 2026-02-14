@@ -32,6 +32,13 @@ class Menu_Manager {
 	private $hidden_items = null;
 
 	/**
+	 * Cached hidden submenu items.
+	 *
+	 * @var array|null
+	 */
+	private $hidden_submenus = null;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -46,6 +53,9 @@ class Menu_Manager {
 
 		// Hide menu items.
 		add_action( 'admin_menu', array( $this, 'hide_menu_items' ), 999 );
+
+		// Remove submenu items.
+		add_action( 'admin_menu', array( $this, 'remove_submenu_items' ), 999 );
 
 		// Add Show All toggle to admin menu.
 		add_action( 'adminmenu', array( $this, 'render_show_all_toggle' ) );
@@ -148,6 +158,44 @@ class Menu_Manager {
 		}
 
 		return $this->hidden_items;
+	}
+
+	/**
+	 * Get hidden submenu items from options based on settings.
+	 *
+	 * @return array Associative array of parent_slug => array of hidden submenu slugs.
+	 */
+	public function get_hidden_submenus() {
+		if ( null !== $this->hidden_submenus ) {
+			return $this->hidden_submenus;
+		}
+
+		$settings = get_option( 'tidy_admin_menu_settings', array() );
+		$apply_to = isset( $settings['apply_to'] ) ? $settings['apply_to'] : 'all';
+
+		if ( 'role' === $apply_to ) {
+			$role = self::get_user_primary_role();
+			if ( $role ) {
+				$role_config = get_option( 'tidy_admin_menu_role_' . $role, array() );
+				if ( ! empty( $role_config ) && isset( $role_config['hidden_submenus'] ) ) {
+					$this->hidden_submenus = $role_config['hidden_submenus'];
+				}
+			}
+			// Fall back to global if no role config.
+			if ( null === $this->hidden_submenus ) {
+				$this->hidden_submenus = get_option( 'tidy_admin_menu_hidden_submenus', array() );
+			}
+		} elseif ( 'user' === $apply_to ) {
+			$this->hidden_submenus = get_user_meta( get_current_user_id(), 'tidy_admin_menu_hidden_submenus', true );
+		} else {
+			$this->hidden_submenus = get_option( 'tidy_admin_menu_hidden_submenus', array() );
+		}
+
+		if ( ! is_array( $this->hidden_submenus ) ) {
+			$this->hidden_submenus = array();
+		}
+
+		return $this->hidden_submenus;
 	}
 
 	/**
@@ -326,6 +374,91 @@ class Menu_Manager {
 	}
 
 	/**
+	 * Remove submenu items based on settings.
+	 */
+	public function remove_submenu_items() {
+		// Don't remove submenus on the settings page — all items must remain
+		// visible so the user can manage them.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['page'] ) && 'tidy-admin-menu' === $_GET['page'] ) {
+			return;
+		}
+
+		global $submenu;
+
+		$settings = get_option( 'tidy_admin_menu_settings', array() );
+
+		// Track what the hardcoded options already hide, to avoid double-removal.
+		$already_hidden = array();
+
+		if ( ! empty( $settings['hide_theme_editor'] ) ) {
+			remove_submenu_page( 'themes.php', 'theme-editor.php' );
+			$already_hidden['themes.php']['theme-editor.php'] = true;
+		}
+
+		if ( ! empty( $settings['hide_plugin_editor'] ) ) {
+			remove_submenu_page( 'plugins.php', 'plugin-editor.php' );
+			$already_hidden['plugins.php']['plugin-editor.php'] = true;
+		}
+
+		if ( ! empty( $settings['hide_available_tools'] ) ) {
+			remove_submenu_page( 'tools.php', 'tools.php' );
+			$already_hidden['tools.php']['tools.php'] = true;
+		}
+
+		if ( ! empty( $settings['hide_privacy'] ) ) {
+			remove_submenu_page( 'options-general.php', 'options-privacy.php' );
+			$already_hidden['options-general.php']['options-privacy.php'] = true;
+		}
+
+		if ( ! empty( $settings['hide_customize'] ) ) {
+			// The Customizer slug includes query parameters (customize.php?return=...),
+			// so we match by prefix instead of using remove_submenu_page().
+			if ( isset( $submenu['themes.php'] ) ) {
+				foreach ( $submenu['themes.php'] as $key => $item ) {
+					if ( isset( $item[2] ) && strpos( $item[2], 'customize.php' ) === 0 ) {
+						unset( $submenu['themes.php'][ $key ] );
+						break;
+					}
+				}
+			}
+			$already_hidden['themes.php']['customize.php'] = true;
+		}
+
+		// Dynamic submenu hiding.
+		$hidden_submenus = $this->get_hidden_submenus();
+
+		if ( empty( $hidden_submenus ) || ! is_array( $submenu ) ) {
+			return;
+		}
+
+		foreach ( $hidden_submenus as $parent_slug => $submenu_slugs ) {
+			if ( ! is_array( $submenu_slugs ) || ! isset( $submenu[ $parent_slug ] ) ) {
+				continue;
+			}
+
+			foreach ( $submenu_slugs as $submenu_slug ) {
+				// Skip if already handled by hardcoded options.
+				if ( isset( $already_hidden[ $parent_slug ][ $submenu_slug ] ) ) {
+					continue;
+				}
+
+				// Customize needs prefix matching.
+				if ( 'customize.php' === $submenu_slug ) {
+					foreach ( $submenu[ $parent_slug ] as $key => $item ) {
+						if ( isset( $item[2] ) && strpos( $item[2], 'customize.php' ) === 0 ) {
+							unset( $submenu[ $parent_slug ][ $key ] );
+							break;
+						}
+					}
+				} else {
+					remove_submenu_page( $parent_slug, $submenu_slug );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Render the Show All toggle button in admin menu.
 	 *
 	 * Uses JavaScript to append to the menu since the adminmenu hook
@@ -339,9 +472,9 @@ class Menu_Manager {
 			return;
 		}
 
-		$button_label = esc_attr__( 'Show hidden menu items', 'tidy-admin-menu' );
-		$text_more    = esc_html__( 'More menu', 'tidy-admin-menu' );
-		$text_less    = esc_html__( 'Less menu', 'tidy-admin-menu' );
+		$button_label = __( 'Show hidden menu items', 'tidy-admin-menu' );
+		$text_more    = __( 'More menu', 'tidy-admin-menu' );
+		$text_less    = __( 'Less menu', 'tidy-admin-menu' );
 
 		?>
 		<script>
@@ -351,9 +484,9 @@ class Menu_Manager {
 				var li = document.createElement('li');
 				li.id = 'tidy-show-all-toggle';
 				li.className = 'tidy-show-all-wrapper';
-				li.innerHTML = '<button type="button" class="tidy-show-all-btn" aria-pressed="false" aria-label="<?php echo $button_label; ?>" data-text-more="<?php echo $text_more; ?>" data-text-less="<?php echo $text_less; ?>">' +
+				li.innerHTML = '<button type="button" class="tidy-show-all-btn" aria-pressed="false" aria-label="<?php echo esc_attr( $button_label ); ?>" data-text-more="<?php echo esc_attr( $text_more ); ?>" data-text-less="<?php echo esc_attr( $text_less ); ?>">' +
 					'<span class="tidy-toggle-icon">+</span>' +
-					'<span class="tidy-toggle-text"><?php echo $text_more; ?></span>' +
+					'<span class="tidy-toggle-text"><?php echo esc_html( $text_more ); ?></span>' +
 					'</button>';
 				adminMenu.appendChild(li);
 			}
@@ -375,11 +508,15 @@ class Menu_Manager {
 	}
 
 	/**
-	 * Output inline styles for admin menu separators and hide collapse menu.
+	 * Output inline styles for admin menu separators, hidden items, and collapse menu.
+	 *
+	 * Critical styles are inlined here to ensure they load on all admin pages,
+	 * including plugin pages (e.g., MailPoet) that may not process wp_enqueue_scripts.
 	 */
 	public function separator_styles() {
 		$settings           = get_option( 'tidy_admin_menu_settings', array() );
 		$hide_collapse_menu = ! empty( $settings['hide_collapse_menu'] );
+		$hidden             = $this->get_hidden_items();
 		?>
 		<style>
 		#adminmenu li.wp-menu-separator {
@@ -394,6 +531,65 @@ class Menu_Manager {
 		<?php if ( $hide_collapse_menu ) : ?>
 		#collapse-menu {
 			display: none !important;
+		}
+		<?php endif; ?>
+		<?php if ( ! empty( $hidden ) ) : ?>
+		/* Critical: Hide menu items - inlined to work on all admin pages */
+		#adminmenu li.tidy-hidden-item {
+			display: none !important;
+		}
+		#adminmenu li.tidy-hidden-item.current,
+		#adminmenu li.tidy-hidden-item.wp-has-current-submenu {
+			display: block !important;
+		}
+		/* Show All toggle - critical styles */
+		#adminmenu .tidy-show-all-wrapper {
+			background: #1d2327;
+			border-top: 1px solid #3c434a;
+			padding: 0;
+			margin: 0;
+		}
+		#adminmenu .tidy-show-all-wrapper .tidy-show-all-btn {
+			display: flex;
+			align-items: center;
+			justify-content: start;
+			gap: 8px;
+			width: 100%;
+			padding: 12px 10px;
+			background: transparent;
+			border: none;
+			color: #a7aaad;
+			font-size: 13px;
+			cursor: pointer;
+		}
+		#adminmenu .tidy-show-all-wrapper .tidy-show-all-btn:hover {
+			background: #2c3338;
+			color: #fff;
+		}
+		#adminmenu .tidy-show-all-wrapper .tidy-show-all-btn .tidy-toggle-icon {
+			font-size: 18px;
+			font-weight: bold;
+			line-height: 1;
+		}
+		.folded #adminmenu .tidy-show-all-wrapper .tidy-toggle-text {
+			display: none;
+		}
+		.folded #adminmenu .tidy-show-all-wrapper .tidy-show-all-btn {
+			justify-content: center;
+			padding: 12px 6px;
+		}
+		/* Show All active state */
+		body.tidy-show-all-active #adminmenu li.tidy-hidden-item {
+			display: block !important;
+			opacity: 0.85;
+		}
+		body.tidy-show-all-active #adminmenu li.tidy-hidden-item > a {
+			font-style: italic;
+			border-left: 3px solid #d63638 !important;
+		}
+		#adminmenu .tidy-show-all-wrapper .tidy-show-all-btn[aria-pressed="true"] {
+			background: #2271b1;
+			color: #fff;
 		}
 		<?php endif; ?>
 		</style>
@@ -541,6 +737,77 @@ class Menu_Manager {
 				'position'     => $position,
 				'is_separator' => $is_separator,
 			);
+		}
+
+		return $items;
+	}
+
+	/**
+	 * Get all current submenu items for the settings page.
+	 *
+	 * @param string $for_role Optional. Filter items by what this role can access.
+	 * @return array Associative array of parent_slug => array of submenu items.
+	 */
+	public static function get_all_submenu_items( $for_role = '' ) {
+		global $submenu;
+
+		$items = array();
+
+		if ( ! is_array( $submenu ) ) {
+			return $items;
+		}
+
+		// Get role capabilities if filtering by role.
+		$role_caps = array();
+		if ( ! empty( $for_role ) ) {
+			$role_obj = get_role( $for_role );
+			if ( $role_obj ) {
+				$role_caps = array_keys( array_filter( $role_obj->capabilities ) );
+			}
+		}
+
+		foreach ( $submenu as $parent => $submenu_items ) {
+			foreach ( $submenu_items as $submenu_item ) {
+				$title      = isset( $submenu_item[0] ) ? $submenu_item[0] : '';
+				$capability = isset( $submenu_item[1] ) ? $submenu_item[1] : '';
+				$slug       = isset( $submenu_item[2] ) ? $submenu_item[2] : '';
+
+				if ( empty( $slug ) ) {
+					continue;
+				}
+
+				// Filter by role capability if specified.
+				if ( ! empty( $for_role ) && ! empty( $capability ) ) {
+					if ( ! in_array( $capability, $role_caps, true ) ) {
+						continue;
+					}
+				}
+
+				// Normalize Customize slug (strip query parameters).
+				if ( strpos( $slug, 'customize.php' ) === 0 ) {
+					$slug = 'customize.php';
+				}
+
+				// Clean title (remove notification bubbles and HTML).
+				$title = preg_replace( '/[\s\xC2\xA0]?<span[^>]*>.*?<\/span>/su', '', $title );
+				$title = preg_replace( '/<br\s*\/?>/i', ' ', $title );
+				$title = wp_strip_all_tags( $title );
+				$title = trim( $title );
+
+				if ( empty( $title ) ) {
+					continue;
+				}
+
+				if ( ! isset( $items[ $parent ] ) ) {
+					$items[ $parent ] = array();
+				}
+
+				$items[ $parent ][] = array(
+					'slug'       => $slug,
+					'title'      => $title,
+					'capability' => $capability,
+				);
+			}
 		}
 
 		return $items;

@@ -151,14 +151,16 @@
 .tidy-menu-item {
 	display: flex;
 	align-items: center;
-	padding: 6px 12px;
+	padding: 6px 8px 6px 11px;
 	margin: 0;
 	background: #f6f7f7;
 	border: 1px solid #dcdcde;
 	border-radius: 4px;
 	margin-bottom: 2px;
 	cursor: grab;
-	transition: background-color 0.15s ease, box-shadow 0.15s ease;
+	transition:
+		background-color 0.15s ease,
+		box-shadow 0.15s ease;
 }
 
 .tidy-menu-item:hover {
@@ -195,6 +197,139 @@
 .tidy-menu-item.tidy-is-hidden .tidy-item-title {
 	text-decoration: line-through;
 	color: #787c82;
+}
+
+/* Submenu items */
+.tidy-menu-item.tidy-has-submenu {
+	flex-wrap: wrap;
+}
+
+.tidy-submenu-badge {
+	font-size: 11px;
+	padding: 1px 8px;
+	background: #dba617;
+	color: #fff;
+	border-radius: 10px;
+	font-weight: 600;
+	white-space: nowrap;
+	margin-left: auto;
+}
+
+.tidy-submenu-badge.tidy-badge-hidden {
+	display: none;
+}
+
+.tidy-submenu-toggle {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	margin-left: 4px;
+	border: none;
+	background: none;
+	color: #787c82;
+	cursor: pointer;
+	transition: transform 0.2s ease;
+	flex-shrink: 0;
+}
+
+.tidy-submenu-toggle:hover {
+	color: #2271b1;
+}
+
+.tidy-parent-expanded > .tidy-submenu-toggle {
+	transform: rotate(180deg);
+}
+
+.tidy-submenu-toggle .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+}
+
+.tidy-submenu-list {
+	display: none;
+	list-style: none;
+	width: 100%;
+	margin: 6px 0 2px 36px;
+	padding: 0 0 0 12px;
+	border-left: 2px solid #dcdcde;
+}
+
+.tidy-parent-expanded > .tidy-submenu-list {
+	display: block;
+}
+
+.tidy-submenu-bulk-toggle {
+	padding: 3px 8px;
+	margin-bottom: 2px;
+}
+
+.tidy-submenu-bulk-toggle label {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 11px;
+	color: #787c82;
+	cursor: pointer;
+}
+
+.tidy-submenu-bulk-toggle input[type="checkbox"] {
+	margin: 0;
+}
+
+.tidy-submenu-item {
+	display: flex;
+	align-items: center;
+	padding: 4px 8px;
+	margin-bottom: 1px;
+	background: #fafafa;
+	border: 1px solid #e5e5e5;
+	border-radius: 3px;
+}
+
+.tidy-submenu-item:hover {
+	background: #fff;
+	border-color: #c3c4c7;
+}
+
+.tidy-submenu-item label {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	cursor: pointer;
+	font-size: 12px;
+}
+
+.tidy-submenu-item input[type="checkbox"] {
+	margin: 0;
+}
+
+.tidy-submenu-item.tidy-is-hidden {
+	opacity: 0.5;
+	background: #fef7f1;
+	border-color: #dba617;
+}
+
+.tidy-submenu-item.tidy-is-hidden .tidy-submenu-title {
+	text-decoration: line-through;
+	color: #787c82;
+}
+
+
+/* Show submenu items toggle */
+.tidy-show-submenus-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	cursor: pointer;
+	padding: 4px 8px;
+}
+
+.tidy-show-submenus-label input[type="checkbox"] {
+	margin: 0;
 }
 
 /* Drag handle */
@@ -250,6 +385,7 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	font-weight: 600;
 }
 
 /* Separator items */
@@ -338,6 +474,24 @@
 
 .tidy-extra-options input[type="checkbox"] {
 	margin: 0;
+}
+
+.tidy-extra-options h4 {
+	margin: 16px 0 8px;
+	font-size: 13px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.tidy-extra-option {
+	margin-bottom: 10px;
+}
+
+.tidy-extra-option .description {
+	margin: 2px 0 0 24px;
+	font-size: 12px;
+	color: #787c82;
+	font-style: italic;
 }
 
 /* Settings panel */
