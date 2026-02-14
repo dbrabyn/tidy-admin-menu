@@ -4,7 +4,7 @@ Tags: admin menu, menu order, hide menu, admin customization, tidy admin menu
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.20
+Stable tag: 1.0.21
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -87,6 +87,14 @@ The toggle only appears if you have hidden at least one menu item.
 3. Hidden items revealed with visual indicator
 
 == Changelog ==
+
+= 1.0.21 =
+* Added submenu item hiding — expand any parent menu item on the settings page to hide individual submenu items
+* Submenu visibility is per-parent with expand/collapse, bulk toggle, and hidden count badges
+* Syncs bidirectionally with existing quick-access submenu hide checkboxes
+* Hiding all submenus under a parent now automatically hides the parent item
+* Supports all apply-to modes (all users, current user, by role) and export/import
+* Renamed "Show All Menu Items" toolbar checkbox to "Toggle All Menu Items" for clarity
 
 = 1.0.20 =
 * Added option to hide the "Collapse menu" toggle in the admin sidebar
