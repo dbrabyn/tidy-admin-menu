@@ -4,7 +4,7 @@ Tags: admin menu, menu order, hide menu, admin customization, tidy admin menu
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.21
+Stable tag: 1.0.22
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -87,6 +87,9 @@ The toggle only appears if you have hidden at least one menu item.
 3. Hidden items revealed with visual indicator
 
 == Changelog ==
+
+= 1.0.22 =
+* Fixed flyout submenus getting cut off at the bottom of the viewport — submenus now reposition upward to stay within view
 
 = 1.0.21 =
 * Added submenu item hiding — expand any parent menu item on the settings page to hide individual submenu items

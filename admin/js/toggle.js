@@ -101,8 +101,30 @@
 				return;
 			}
 			var rect = activeItem.getBoundingClientRect();
+			var top = rect.top;
+
+			// Measure submenu height by temporarily making it visible off-screen.
 			activeSubmenu.style.position = 'fixed';
-			activeSubmenu.style.top = rect.top + 'px';
+			activeSubmenu.style.left = '-9999px';
+			activeSubmenu.style.top = '0';
+			activeSubmenu.style.maxHeight = '';
+			activeSubmenu.style.overflowY = '';
+			var submenuHeight = activeSubmenu.offsetHeight;
+
+			// If submenu would overflow the viewport bottom, shift it up.
+			var viewportHeight = window.innerHeight;
+			var padding = 8;
+			if ( top + submenuHeight > viewportHeight - padding ) {
+				top = viewportHeight - submenuHeight - padding;
+			}
+
+			// Don't let it go above the admin bar.
+			var adminBarHeight = 32;
+			if ( top < adminBarHeight ) {
+				top = adminBarHeight;
+			}
+
+			activeSubmenu.style.top = top + 'px';
 			activeSubmenu.style.left = rect.right + 'px';
 			activeSubmenu.style.zIndex = '10001';
 		}
