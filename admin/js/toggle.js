@@ -113,7 +113,7 @@
 
 			// If submenu would overflow the viewport bottom, shift it up.
 			var viewportHeight = window.innerHeight;
-			var padding = 8;
+			var padding = 32;
 			if ( top + submenuHeight > viewportHeight - padding ) {
 				top = viewportHeight - submenuHeight - padding;
 			}
