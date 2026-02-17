@@ -4,7 +4,7 @@ Tags: admin menu, menu order, hide menu, admin customization, tidy admin menu
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.23
+Stable tag: 1.0.24
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -87,6 +87,9 @@ The toggle only appears if you have hidden at least one menu item.
 3. Hidden items revealed with visual indicator
 
 == Changelog ==
+
+= 1.0.24 =
+* Added GitHub API authentication to avoid rate limit errors (403) when checking for plugin updates
 
 = 1.0.23 =
 * Increased bottom viewport padding for flyout submenus to avoid overlap with OS status bars and browser chrome
