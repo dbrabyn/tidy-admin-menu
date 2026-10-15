@@ -118,8 +118,9 @@
 				top = viewportHeight - submenuHeight - padding;
 			}
 
-			// Don't let it go above the admin bar.
-			var adminBarHeight = 32;
+			// Don't let it go above the admin bar (32px desktop, 46px below 782px).
+			var adminBar = document.getElementById( 'wpadminbar' );
+			var adminBarHeight = adminBar ? adminBar.offsetHeight : 0;
 			if ( top < adminBarHeight ) {
 				top = adminBarHeight;
 			}

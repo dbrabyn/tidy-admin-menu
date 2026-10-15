@@ -52,7 +52,12 @@ function tidy_admin_menu_uninstall() {
 
 	// Clean up multisite if applicable.
 	if ( is_multisite() ) {
-		$sites = get_sites( array( 'fields' => 'ids' ) );
+		$sites = get_sites(
+			array(
+				'fields' => 'ids',
+				'number' => 0, // No limit. get_sites() returns 100 by default.
+			)
+		);
 
 		foreach ( $sites as $site_id ) {
 			switch_to_blog( $site_id );

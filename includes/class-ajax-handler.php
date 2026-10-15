@@ -21,8 +21,6 @@ class Ajax_Handler {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'wp_ajax_tidy_save_menu_order', array( $this, 'save_menu_order' ) );
-		add_action( 'wp_ajax_tidy_save_hidden_items', array( $this, 'save_hidden_items' ) );
 		add_action( 'wp_ajax_tidy_save_all_settings', array( $this, 'save_all_settings' ) );
 		add_action( 'wp_ajax_tidy_save_settings', array( $this, 'save_settings' ) );
 		add_action( 'wp_ajax_tidy_reset_menu', array( $this, 'reset_menu' ) );
@@ -56,11 +54,18 @@ class Ajax_Handler {
 	 * @return string Sanitized slug.
 	 */
 	private function sanitize_menu_slug( $slug ) {
-		// Menu slugs can contain special characters like ? and =.
-		// We need to preserve these while still sanitizing.
-		$slug = wp_unslash( $slug );
-		$slug = sanitize_text_field( $slug );
-		return $slug;
+		// Callers pass already-unslashed data, so don't unslash again.
+		if ( ! is_scalar( $slug ) ) {
+			return '';
+		}
+
+		// Menu slugs can contain special characters like ? and =, and
+		// percent-encoded sequences like %2F. sanitize_text_field() strips
+		// the latter, so the saved slug would never match the menu again.
+		$slug = wp_check_invalid_utf8( (string) $slug );
+		$slug = wp_strip_all_tags( $slug );
+		$slug = preg_replace( '/[\r\n\t ]+/', ' ', $slug );
+		return trim( $slug );
 	}
 
 	/**
@@ -115,35 +120,6 @@ class Ajax_Handler {
 		}
 
 		return 'user' === $apply_to ? 'user' : 'option';
-	}
-
-	/**
-	 * Save menu order.
-	 */
-	public function save_menu_order() {
-		$this->verify_request();
-
-		// Get and sanitize menu order.
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified in verify_request(), sanitized per-item below.
-		$order = isset( $_POST['order'] ) ? wp_unslash( $_POST['order'] ) : array();
-
-		if ( ! is_array( $order ) ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid data format.', 'tidy-admin-menu' ) ) );
-		}
-
-		// Sanitize each slug.
-		$sanitized_order = array_map( array( $this, 'sanitize_menu_slug' ), $order );
-		$sanitized_order = array_filter( $sanitized_order ); // Remove empty values.
-		$sanitized_order = array_values( $sanitized_order ); // Re-index.
-
-		// Save based on storage method.
-		if ( 'user' === $this->get_storage_method() ) {
-			update_user_meta( get_current_user_id(), 'tidy_admin_menu_order', $sanitized_order );
-		} else {
-			update_option( 'tidy_admin_menu_order', $sanitized_order, false ); // Don't autoload large arrays.
-		}
-
-		wp_send_json_success( array( 'message' => __( 'Menu order saved.', 'tidy-admin-menu' ) ) );
 	}
 
 	/**
@@ -231,35 +207,6 @@ class Ajax_Handler {
 	}
 
 	/**
-	 * Save hidden items.
-	 */
-	public function save_hidden_items() {
-		$this->verify_request();
-
-		// Get and sanitize hidden items.
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified in verify_request(), sanitized per-item below.
-		$hidden = isset( $_POST['hidden'] ) ? wp_unslash( $_POST['hidden'] ) : array();
-
-		if ( ! is_array( $hidden ) ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid data format.', 'tidy-admin-menu' ) ) );
-		}
-
-		// Sanitize each slug.
-		$sanitized_hidden = array_map( array( $this, 'sanitize_menu_slug' ), $hidden );
-		$sanitized_hidden = array_filter( $sanitized_hidden );
-		$sanitized_hidden = array_values( $sanitized_hidden );
-
-		// Save based on storage method.
-		if ( 'user' === $this->get_storage_method() ) {
-			update_user_meta( get_current_user_id(), 'tidy_admin_menu_hidden', $sanitized_hidden );
-		} else {
-			update_option( 'tidy_admin_menu_hidden', $sanitized_hidden, false );
-		}
-
-		wp_send_json_success( array( 'message' => __( 'Hidden items saved.', 'tidy-admin-menu' ) ) );
-	}
-
-	/**
 	 * Save general settings.
 	 */
 	public function save_settings() {
@@ -273,14 +220,9 @@ class Ajax_Handler {
 			$apply_to = 'all';
 		}
 
-		// Get hide_collapse_menu setting.
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified in verify_request().
-		$hide_collapse_menu = isset( $_POST['hide_collapse_menu'] ) && 'true' === $_POST['hide_collapse_menu'];
-
 		// Merge with existing settings to preserve extra options.
-		$settings                      = get_option( 'tidy_admin_menu_settings', array() );
-		$settings['apply_to']          = $apply_to;
-		$settings['hide_collapse_menu'] = $hide_collapse_menu;
+		$settings             = get_option( 'tidy_admin_menu_settings', array() );
+		$settings['apply_to'] = $apply_to;
 
 		update_option( 'tidy_admin_menu_settings', $settings, true ); // Autoload settings.
 
@@ -425,10 +367,11 @@ class Ajax_Handler {
 		$storage_method = $this->get_storage_method();
 
 		// Save based on storage method.
-		if ( 'role' === $storage_method && ! empty( $import_role ) ) {
-			// Validate role exists.
+		if ( 'role' === $storage_method ) {
+			// Validate role exists. Without this, an empty role fell through
+			// and overwrote the global options.
 			$configurable_roles = Menu_Manager::get_configurable_roles();
-			if ( ! isset( $configurable_roles[ $import_role ] ) ) {
+			if ( empty( $import_role ) || ! isset( $configurable_roles[ $import_role ] ) ) {
 				wp_send_json_error( array( 'message' => __( 'Invalid role specified.', 'tidy-admin-menu' ) ) );
 			}
 
@@ -456,11 +399,19 @@ class Ajax_Handler {
 			if ( ! in_array( $apply_to, array( 'all', 'user', 'role' ), true ) ) {
 				$apply_to = 'all';
 			}
-			update_option(
-				'tidy_admin_menu_settings',
-				array( 'apply_to' => $apply_to ),
-				true
-			);
+
+			// Merge into existing settings so options missing from older exports survive.
+			$settings             = get_option( 'tidy_admin_menu_settings', array() );
+			$settings['apply_to'] = $apply_to;
+
+			$extra_options = array( 'hide_collapse_menu', 'hide_theme_editor', 'hide_plugin_editor', 'hide_available_tools', 'hide_privacy', 'hide_customize' );
+			foreach ( $extra_options as $key ) {
+				if ( isset( $data['settings'][ $key ] ) ) {
+					$settings[ $key ] = (bool) $data['settings'][ $key ];
+				}
+			}
+
+			update_option( 'tidy_admin_menu_settings', $settings, true );
 		}
 
 		wp_send_json_success( array( 'message' => __( 'Configuration imported successfully.', 'tidy-admin-menu' ) ) );

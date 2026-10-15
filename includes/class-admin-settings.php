@@ -130,6 +130,7 @@ class Admin_Settings {
 					'resetSuccess'       => __( 'Menu reset to default.', 'tidy-admin-menu' ),
 					'resetError'         => __( 'Error resetting menu. Please try again.', 'tidy-admin-menu' ),
 					'confirmSwitchRole'  => __( 'You have unsaved changes. Are you sure you want to switch roles? Your changes will be lost.', 'tidy-admin-menu' ),
+					'confirmSwitchMode'  => __( 'You have unsaved changes. Changing who these settings apply to reloads the page and your changes will be lost. Continue?', 'tidy-admin-menu' ),
 					'selectFileToImport' => __( 'Please select a file to import.', 'tidy-admin-menu' ),
 					'removeSeparator'    => __( 'Remove separator', 'tidy-admin-menu' ),
 					/* translators: %d: number of hidden submenu items */
@@ -234,6 +235,22 @@ class Admin_Settings {
 		// Get all submenu items for the settings page.
 		$all_submenus = Menu_Manager::get_all_submenu_items( $active_role );
 
+		// The global $menu only holds separators from the current user's own
+		// config. When editing another role, add that role's separators so
+		// saving doesn't drop them.
+		$listed_slugs = wp_list_pluck( $menu_items, 'slug' );
+		foreach ( $menu_order as $slug ) {
+			if ( preg_match( '/^separator\d+$/', $slug ) && ! in_array( $slug, $listed_slugs, true ) ) {
+				$menu_items[] = array(
+					'slug'         => $slug,
+					'title'        => '',
+					'icon'         => '',
+					'position'     => 0,
+					'is_separator' => true,
+				);
+			}
+		}
+
 		// Sort menu items by saved order if exists.
 		if ( ! empty( $menu_order ) ) {
 			usort(
@@ -259,6 +276,12 @@ class Admin_Settings {
 		<div class="wrap tidy-admin-menu-wrap">
 			<h1><?php esc_html_e( 'Tidy Admin Menu', 'tidy-admin-menu' ); ?></h1>
 			<p class="description"><?php esc_html_e( 'Drag and drop menu items to reorder. Uncheck items to hide them from the admin menu.', 'tidy-admin-menu' ); ?></p>
+
+			<?php if ( 'role' === $apply_to && empty( $active_role ) ) : ?>
+				<div class="notice notice-warning">
+					<p><?php esc_html_e( 'No users have a standard WordPress role, so there is no role to configure. Choose "All users" or "Current user only" under "Apply settings to".', 'tidy-admin-menu' ); ?></p>
+				</div>
+			<?php endif; ?>
 
 			<?php if ( ! empty( $unmanageable_items ) ) : ?>
 				<div class="notice notice-warning">

@@ -4,7 +4,7 @@ Tags: admin menu, menu order, hide menu, admin customization, tidy admin menu
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.24
+Stable tag: 1.0.25
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -87,6 +87,21 @@ The toggle only appears if you have hidden at least one menu item.
 3. Hidden items revealed with visual indicator
 
 == Changelog ==
+
+= 1.0.25 =
+* Fixed: in role mode, saving a role no longer drops separators that only that role uses
+* Fixed: hiding a submenu item for one role or user no longer hides it for everyone through the quick access options
+* Fixed: importing a configuration no longer resets the quick access options and the Collapse menu setting
+* Fixed: menu items without a menu slug no longer disappear from the sidebar once a custom order is saved
+* Fixed: hiding the first item of a submenu no longer changes where the parent menu item links
+* Fixed: changing "Apply settings to" now asks before discarding unsaved changes
+* Fixed: submenu items whose slug contains encoded characters such as %2F can now be hidden
+* Fixed: role mode on a site with no users in a standard role now explains why it can't save, and import no longer overwrites the global settings
+* Fixed: uninstall now cleans up every site on networks with more than 100 sites
+* Fixed: the settings page no longer loads every user ID to build the role tabs
+* Fixed: menu flyouts no longer slide under the taller mobile admin bar
+* Removed the Super Admin role tab on multisite, which could not load or save
+* Removed unused AJAX endpoints
 
 = 1.0.24 =
 * Added GitHub API authentication to avoid rate limit errors (403) when checking for plugin updates

@@ -343,6 +343,10 @@
 		 */
 		markUnsaved: function() {
 			this.hasUnsavedChanges = true;
+			// Role mode with no role to edit: the server would reject the save.
+			if ( this.applyTo === 'role' && ! this.activeRole ) {
+				return;
+			}
 			$( '#tidy-save-settings' ).prop( 'disabled', false ).addClass( 'button-primary' );
 			this.updateStatus( 'unsaved' );
 		},
@@ -442,76 +446,24 @@
 		},
 
 		/**
-		 * Save menu order via AJAX.
-		 */
-		saveOrder: function() {
-			var self = this;
-			var order = [];
-
-			$( '#tidy-menu-list .tidy-menu-item' ).each( function() {
-				order.push( $( this ).data( 'slug' ) );
-			} );
-
-			$.post( tidyAdminMenu.ajaxUrl, {
-				action: 'tidy_save_menu_order',
-				nonce: tidyAdminMenu.nonce,
-				order: order
-			} )
-			.done( function( response ) {
-				if ( response.success ) {
-					self.updateStatus( 'saved' );
-				} else {
-					self.updateStatus( 'error' );
-				}
-			} )
-			.fail( function() {
-				self.updateStatus( 'error' );
-			} );
-		},
-
-		/**
-		 * Save hidden items via AJAX.
-		 */
-		saveHidden: function() {
-			var self = this;
-			var hidden = [];
-
-			$( '#tidy-menu-list .tidy-menu-item.tidy-is-hidden' ).each( function() {
-				hidden.push( $( this ).data( 'slug' ) );
-			} );
-
-			$.post( tidyAdminMenu.ajaxUrl, {
-				action: 'tidy_save_hidden_items',
-				nonce: tidyAdminMenu.nonce,
-				hidden: hidden
-			} )
-			.done( function( response ) {
-				if ( response.success ) {
-					self.updateStatus( 'saved' );
-				} else {
-					self.updateStatus( 'error' );
-				}
-			} )
-			.fail( function() {
-				self.updateStatus( 'error' );
-			} );
-		},
-
-		/**
 		 * Save general settings.
 		 */
 		saveSettings: function() {
 			var self = this;
 			var applyTo = $( 'input[name="tidy_apply_to"]:checked' ).val();
-			var hideCollapseMenu = $( '#tidy-hide-collapse-menu' ).prop( 'checked' );
+
+			// The page reloads after this save, which would drop unsaved edits.
+			if ( this.hasUnsavedChanges && ! confirm( tidyAdminMenu.strings.confirmSwitchMode ) ) {
+				$( 'input[name="tidy_apply_to"][value="' + this.applyTo + '"]' ).prop( 'checked', true );
+				return;
+			}
 
 			this.updateStatus( 'saving' );
 
 			$.post( tidyAdminMenu.ajaxUrl, {
 				action: 'tidy_save_settings',
 				nonce: tidyAdminMenu.nonce,
-				apply_to: applyTo,
-				hide_collapse_menu: hideCollapseMenu ? 'true' : 'false'
+				apply_to: applyTo
 			} )
 			.done( function( response ) {
 				if ( response.success ) {
@@ -620,7 +572,7 @@
 						window.location.reload();
 					} else {
 						self.updateStatus( 'error' );
-						alert( response.data.message || tidyAdminMenu.strings.error );
+						alert( ( response.data && response.data.message ) || tidyAdminMenu.strings.error );
 					}
 				} )
 				.fail( function() {
@@ -679,6 +631,11 @@
 		 * @param {jQuery} $checkbox The hardcoded checkbox that changed.
 		 */
 		syncHardcodedToSubmenu: function( $checkbox ) {
+			// Quick access options are global. Per-role or per-user submenu
+			// lists must not mirror them, or a per-role hide becomes global.
+			if ( this.applyTo !== 'all' ) {
+				return;
+			}
 			var id = $checkbox.attr( 'id' );
 			var mapping = this.hardcodedMappings[ id ];
 			if ( ! mapping ) {
@@ -699,9 +656,14 @@
 		/**
 		 * Sync a dynamic submenu item change to its hardcoded Extra Options checkbox.
 		 *
+		 * Only runs in "All users" mode, see syncHardcodedToSubmenu().
+		 *
 		 * @param {jQuery} $subItem The submenu item that changed.
 		 */
 		syncSubmenuToHardcoded: function( $subItem ) {
+			if ( this.applyTo !== 'all' ) {
+				return;
+			}
 			var parentSlug = $subItem.data( 'parent-slug' );
 			var slug = $subItem.data( 'slug' );
 			var isHidden = $subItem.hasClass( 'tidy-is-hidden' );

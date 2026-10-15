@@ -3,7 +3,7 @@
  * Plugin Name: Tidy Admin Menu
  * Plugin URI: https://github.com/dbrabyn/tidy-admin-menu
  * Description: Declutter your WordPress dashboard by sorting and hiding admin menu items with a simple Show All toggle.
- * Version: 1.0.24
+ * Version: 1.0.25
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * Author: David Brabyn
@@ -42,7 +42,7 @@ $tidy_admin_menu_update_checker = PucFactory::buildUpdateChecker(
 $tidy_admin_menu_update_checker->setBranch( 'main' );
 
 // Use the existing GitHub token from wp-config.php to avoid API rate limits.
-if ( defined( 'PLL_ACF_SYNC_GITHUB_TOKEN' ) && PLL_ACF_SYNC_GITHUB_TOKEN ) {
+if ( defined( 'PLL_ACF_SYNC_GITHUB_TOKEN' ) && is_string( PLL_ACF_SYNC_GITHUB_TOKEN ) && '' !== PLL_ACF_SYNC_GITHUB_TOKEN ) {
 	$tidy_admin_menu_update_checker->setAuthentication( PLL_ACF_SYNC_GITHUB_TOKEN );
 }
 
@@ -94,8 +94,7 @@ function tidy_admin_menu_activate() {
 		add_option(
 			'tidy_admin_menu_settings',
 			array(
-				'apply_to'    => 'all', // 'all', 'user', or 'role'.
-				'target_role' => 'administrator',
+				'apply_to' => 'all', // 'all', 'user', or 'role'.
 			),
 			'',
 			'yes' // Autoload.

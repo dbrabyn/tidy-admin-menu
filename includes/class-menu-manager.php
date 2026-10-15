@@ -60,9 +60,6 @@ class Menu_Manager {
 		// Add Show All toggle to admin menu.
 		add_action( 'adminmenu', array( $this, 'render_show_all_toggle' ) );
 
-		// Add body class for Show All state.
-		add_filter( 'admin_body_class', array( $this, 'add_body_class' ) );
-
 		// Enqueue toggle script on all admin pages.
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_toggle_assets' ) );
 
@@ -305,11 +302,18 @@ class Menu_Manager {
 		$menu_by_slug = array();
 
 		// Index menu items by slug for quick lookup.
-		// Skip items with empty slugs (e.g., ACF options pages without menu_slug).
+		// Items with empty slugs (e.g., ACF options pages without menu_slug) can't
+		// be ordered, but must stay in the menu, so keep them with the remaining items.
 		// Preserve original position for items not in custom order.
+		$unslugged = array();
 		foreach ( $menu as $key => $item ) {
 			if ( isset( $item[2] ) && '' !== $item[2] ) {
 				$menu_by_slug[ $item[2] ] = array(
+					'item'              => $item,
+					'original_position' => $key,
+				);
+			} else {
+				$unslugged[] = array(
 					'item'              => $item,
 					'original_position' => $key,
 				);
@@ -326,10 +330,12 @@ class Menu_Manager {
 		}
 
 		// Sort remaining items by their original position before adding.
-		uasort(
+		$menu_by_slug = array_merge( array_values( $menu_by_slug ), $unslugged );
+		usort(
 			$menu_by_slug,
 			function ( $a, $b ) {
-				return $a['original_position'] - $b['original_position'];
+				// Positions can be decimal strings like "26.5", which subtraction would truncate.
+				return (float) $a['original_position'] <=> (float) $b['original_position'];
 			}
 		);
 
@@ -443,16 +449,29 @@ class Menu_Manager {
 					continue;
 				}
 
-				// Customize needs prefix matching.
-				if ( 'customize.php' === $submenu_slug ) {
-					foreach ( $submenu[ $parent_slug ] as $key => $item ) {
-						if ( isset( $item[2] ) && strpos( $item[2], 'customize.php' ) === 0 ) {
-							unset( $submenu[ $parent_slug ][ $key ] );
-							break;
-						}
+				foreach ( $submenu[ $parent_slug ] as $key => $item ) {
+					if ( ! isset( $item[2] ) ) {
+						continue;
 					}
-				} else {
-					remove_submenu_page( $parent_slug, $submenu_slug );
+
+					// Customize needs prefix matching (its slug carries a return URL).
+					$matches = 'customize.php' === $submenu_slug
+						? strpos( $item[2], 'customize.php' ) === 0
+						: $item[2] === $submenu_slug;
+
+					if ( ! $matches ) {
+						continue;
+					}
+
+					if ( array_key_first( $submenu[ $parent_slug ] ) === $key ) {
+						// WordPress links the parent to its first submenu item.
+						// Removing that item would repoint the parent (e.g. Posts
+						// to Add New), so hide it with CSS instead.
+						$submenu[ $parent_slug ][ $key ][4] = trim( ( isset( $item[4] ) ? $item[4] : '' ) . ' tidy-hidden-submenu' );
+					} else {
+						unset( $submenu[ $parent_slug ][ $key ] );
+					}
+					break;
 				}
 			}
 		}
@@ -496,18 +515,6 @@ class Menu_Manager {
 	}
 
 	/**
-	 * Add body class for Show All state.
-	 *
-	 * @param string $classes Body classes.
-	 * @return string Modified body classes.
-	 */
-	public function add_body_class( $classes ) {
-		// The actual toggle state is handled by JavaScript.
-		// This just ensures the base class is available.
-		return $classes;
-	}
-
-	/**
 	 * Output inline styles for admin menu separators, hidden items, and collapse menu.
 	 *
 	 * Critical styles are inlined here to ensure they load on all admin pages,
@@ -527,6 +534,9 @@ class Menu_Manager {
 			height: 1px;
 			padding: 0;
 			border-top: 1px solid #555;
+		}
+		#adminmenu .wp-submenu li.tidy-hidden-submenu {
+			display: none;
 		}
 		<?php if ( $hide_collapse_menu ) : ?>
 		#collapse-menu {
@@ -888,12 +898,19 @@ class Menu_Manager {
 	/**
 	 * Get standard WordPress roles for the role tabs UI.
 	 *
-	 * Returns the 6 standard WP roles in order of privilege, with info about
+	 * Returns the 5 standard WP roles in order of privilege, with info about
 	 * whether each role has users and can access admin.
 	 *
 	 * @return array Array of role data with slug, name, has_users, and can_admin keys.
 	 */
 	public static function get_standard_roles_for_tabs() {
+		static $result = null;
+
+		// Called twice per settings page load (enqueue and render).
+		if ( null !== $result ) {
+			return $result;
+		}
+
 		// Standard WordPress roles in order of privilege.
 		$standard_roles = array(
 			'administrator' => __( 'Administrator', 'tidy-admin-menu' ),
@@ -902,14 +919,6 @@ class Menu_Manager {
 			'contributor'   => __( 'Contributor', 'tidy-admin-menu' ),
 			'subscriber'    => __( 'Subscriber', 'tidy-admin-menu' ),
 		);
-
-		// Add Super Admin for multisite.
-		if ( is_multisite() ) {
-			$standard_roles = array_merge(
-				array( 'super_admin' => __( 'Super Admin', 'tidy-admin-menu' ) ),
-				$standard_roles
-			);
-		}
 
 		$all_roles = wp_roles()->roles;
 		$result    = array();
@@ -921,32 +930,20 @@ class Menu_Manager {
 				$can_admin = ! empty( $all_roles[ $role_slug ]['capabilities']['read'] );
 			}
 
-			// Super Admin is special - check differently.
-			if ( 'super_admin' === $role_slug ) {
-				$can_admin = true;
-			}
-
-			// Count users with this role using direct query for reliability.
-			$user_count = 0;
-			if ( 'super_admin' === $role_slug ) {
-				// Count super admins.
-				$super_admins = get_super_admins();
-				$user_count   = count( $super_admins );
-			} else {
-				// Use get_users() for accurate count.
-				$users_with_role = get_users(
-					array(
-						'role'   => $role_slug,
-						'fields' => 'ID',
-					)
-				);
-				$user_count      = count( $users_with_role );
-			}
+			// Only need to know whether one user exists, so fetch at most one ID.
+			$has_users = (bool) get_users(
+				array(
+					'role'        => $role_slug,
+					'fields'      => 'ID',
+					'number'      => 1,
+					'count_total' => false,
+				)
+			);
 
 			$result[ $role_slug ] = array(
 				'slug'      => $role_slug,
 				'name'      => $role_name,
-				'has_users' => $user_count > 0,
+				'has_users' => $has_users,
 				'can_admin' => $can_admin,
 			);
 		}
